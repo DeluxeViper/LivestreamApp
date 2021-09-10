@@ -1,0 +1,30 @@
+<resources>
+    <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="bottomAppBarStyle">@style/Widget.App.BottomAppBar</item>
+        <item name="floatingActionButtonStyle">@style/Widget.App.FloatingActionButton</item>
+
+        <item name="colorPrimary">@color/columbia_blue</item>
+        <item name="colorPrimaryDark">@color/storm_cloud</item>
+        <item name="colorAccent">@color/weldon_blue</item>
+    </style>
+
+    <style name="Widget.App.BottomAppBar" parent="Widget.MaterialComponents.BottomAppBar.Colored">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomAppBar</item>
+    </style>
+
+    <style name="Widget.App.FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.FloatingActionButton</item>
+    </style>
+
+    <style name="ThemeOverlay.App.BottomAppBar" parent="">
+        <item name="colorPrimary">@color/shrine_pink_100</item>
+        <item name="colorOnPrimary">@color/shrine_pink_900</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.MaterialComponents.Subtitle1</item>
+    </style>
+
+    <style name="ThemeOverlay.App.FloatingActionButton" parent="">
+        <item name="colorSecondary">@color/shrine_pink_50</item>
+        <item name="colorOnSecondary">@color/shrine_pink_900</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.MaterialComponents.SmallComponent</item>
+    </style>
+</resources>
