@@ -16,11 +16,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
 /**
  * A simple [Fragment] subclass.
  * Use the [LiveBroadcastFragment.newInstance] factory method to
@@ -43,14 +38,14 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        b_start_stop.setOnClickListener(this)
-        b_record.setOnClickListener(this)
-        switch_camera.setOnClickListener(this)
+        bStartStopStream.setOnClickListener(this)
+        bRecord.setOnClickListener(this)
+        bSwitchCamera.setOnClickListener(this)
 
-        rtmpCamera1 = RtmpCamera1(surfaceView, this)
+        rtmpCamera1 = RtmpCamera1(broadcasterSurfaceView, this)
         rtmpCamera1!!.setReTries(10)
 
-        surfaceView.holder.addCallback(this)
+        broadcasterSurfaceView.holder.addCallback(this)
     }
 
     override fun onAuthErrorRtmp() {
@@ -72,7 +67,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
             } else {
                 Toast.makeText(activity, "Connection failed: $reason", Toast.LENGTH_SHORT).show()
                 rtmpCamera1!!.stopStream()
-                b_start_stop.setText("Start stream")
+                bStartStopStream.setText("Start stream")
             }
         }
     }
@@ -101,10 +96,10 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
 
     override fun onClick(view: View?) {
         when (view?.id) {
-            R.id.b_start_stop -> {
+            R.id.bStartStopStream -> {
                 if (!rtmpCamera1!!.isStreaming) {
                     if (rtmpCamera1!!.isRecording || rtmpCamera1!!.prepareAudio() && rtmpCamera1!!.prepareVideo()) {
-                        b_start_stop.setText("Stop stream")
+                        bStartStopStream.setText("Stop stream")
                         rtmpCamera1!!.startStream(streamUrl)
                     } else {
                         Toast.makeText(
@@ -114,12 +109,12 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
                         ).show()
                     }
                 } else {
-                    b_start_stop.setText("Start stream")
+                    bStartStopStream.setText("Start stream")
                     rtmpCamera1!!.stopStream()
                 }
                 return
             }
-            R.id.switch_camera -> {
+            R.id.bSwitchCamera -> {
                 try {
                     rtmpCamera1!!.switchCamera()
                 } catch (e: CameraOpenException) {
@@ -127,7 +122,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
                 }
                 return
             }
-            R.id.b_record -> {
+            R.id.bRecord -> {
                 // TODO: NOT SETUP
                 if (!rtmpCamera1!!.isRecording) {
                     try {
@@ -140,7 +135,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
                         if (!rtmpCamera1!!.isStreaming) {
                             if (rtmpCamera1!!.prepareAudio() && rtmpCamera1!!.prepareVideo()) {
                                 rtmpCamera1!!.startRecord("${folder!!.absolutePath}/${currDateAndTime}.mp4")
-                                b_record.setText("Stop record")
+                                bRecord.setText("Stop record")
                                 Toast.makeText(activity, "Recording...", Toast.LENGTH_SHORT).show()
                             } else {
                                 Toast.makeText(
@@ -151,12 +146,12 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
                             }
                         } else {
                             rtmpCamera1!!.startRecord("${folder!!.absolutePath}/${currDateAndTime}.mp4")
-                            b_record.setText("Stop record")
+                            bRecord.setText("Stop record")
                             Toast.makeText(activity, "Recording...", Toast.LENGTH_SHORT).show()
                         }
                     } catch (e: IOException) {
                         rtmpCamera1!!.stopRecord()
-                        b_record.setText("Start record")
+                        bRecord.setText("Start record")
                         Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -176,7 +171,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
 
     override fun surfaceDestroyed(surfaceHolder: SurfaceHolder) {
         rtmpCamera1!!.stopRecord()
-        b_record.setText("Start record")
+        bRecord.setText("Start record")
         Toast.makeText(
             activity,
             "file $currDateAndTime.mp4 saved in ${folder!!.absolutePath}",
@@ -185,7 +180,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
         currDateAndTime = ""
         if (rtmpCamera1!!.isStreaming) {
             rtmpCamera1!!.stopStream()
-            b_start_stop.setText("Start stream")
+            bStartStopStream.setText("Start stream")
         }
         rtmpCamera1!!.stopPreview()
     }

@@ -63,6 +63,9 @@ dependencies {
 //    // CameraX View class
 //    implementation "androidx.camera:camera-view:1.0.0-alpha28"
 
+    // Stream (broadcaster) client
     implementation 'com.github.pedroSG94.rtmp-rtsp-stream-client-java:rtplibrary:2.1.1'
-    implementation "de.mrmaffen:vlc-android-sdk:1.0.6"
+
+    // Stream player
+    implementation 'com.github.pedroSG94.vlc-example-streamplayer:pedrovlc:2.5.14v3'
 }
