@@ -6,10 +6,23 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
         <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment_container"
+            android:id="@+id/nav_host"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_width="match_parent"/>
+            app:defaultNavHost="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navGraph="@navigation/nav_graph" />
+
+<!--        <androidx.fragment.app.FragmentContainerView-->
+<!--            android:id="@+id/fragment_container"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_width="match_parent"/>-->
 
         <com.google.android.material.bottomappbar.BottomAppBar
             android:id="@+id/bottomAppBar"
@@ -26,6 +39,5 @@
             app:srcCompat="@drawable/ic_baseline_live_tv_24"
             app:layout_anchor="@id/bottomAppBar"
             />
-<!--            app:navigationIcon="@drawable/ic_menu_24dp"-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

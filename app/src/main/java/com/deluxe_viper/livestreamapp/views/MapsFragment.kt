@@ -1,4 +1,4 @@
-package com.deluxe_viper.livestreamapp
+package com.deluxe_viper.livestreamapp.views
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
+import com.deluxe_viper.livestreamapp.R
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -83,7 +84,7 @@ class MapsFragment : Fragment() {
                 val location = it.result
 
                 val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-                val ref: DatabaseReference = database.getReference("test")
+                val ref: DatabaseReference = database.getReference("location")
                 if (location != null) {
                     val latLng = LatLng(location.latitude, location.longitude)
 

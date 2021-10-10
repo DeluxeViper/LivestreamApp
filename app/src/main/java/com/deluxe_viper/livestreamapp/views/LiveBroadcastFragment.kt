@@ -1,4 +1,4 @@
-package com.deluxe_viper.livestreamapp
+package com.deluxe_viper.livestreamapp.views
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,6 +7,7 @@ import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import com.deluxe_viper.livestreamapp.R
 import com.pedro.encoder.input.video.CameraOpenException
 import com.pedro.rtmp.utils.ConnectCheckerRtmp
 import com.pedro.rtplibrary.rtmp.RtmpCamera1
