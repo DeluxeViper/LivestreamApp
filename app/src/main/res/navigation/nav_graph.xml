@@ -37,6 +37,9 @@
         <action
             android:id="@+id/action_mapsFragment_to_streamPlayerFragment"
             app:destination="@id/streamPlayerFragment" />
+        <action
+            android:id="@+id/action_mapsFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/streamPlayerFragment"

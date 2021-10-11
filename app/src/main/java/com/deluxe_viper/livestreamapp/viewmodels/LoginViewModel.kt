@@ -105,5 +105,30 @@ class LoginViewModel(private val dispatcher: CoroutineDispatcher) : ViewModel(),
         }
     }
 
+    private val _signOutStatus = MutableLiveData<ResultOf<String>>()
+    val signOutStatus: LiveData<ResultOf<String>> = _signOutStatus
+
+    fun signOut() {
+        loading.postValue(true)
+        viewModelScope.launch(dispatcher) {
+            var errorCode = -1
+            try {
+                auth?.let { authentication ->
+                    authentication.signOut()
+                    _signOutStatus.postValue(ResultOf.Success("Signout Successful"))
+                    loading.postValue(false)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                loading.postValue(false)
+                if (errorCode != -1) {
+                    _signOutStatus.postValue(ResultOf.Failure("Failed with Error Code $errorCode", e))
+                } else {
+                    _signOutStatus.postValue(ResultOf.Failure("Failed with Exception: ${e.message}", e))
+                }
+            }
+        }
+    }
+
     fun fetchLoading(): LiveData<Boolean> = loading
 }
