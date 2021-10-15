@@ -8,17 +8,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.MainActivity
 import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.utils.ResultOf
 import com.deluxe_viper.livestreamapp.viewmodels.LoginViewModel
+import com.deluxe_viper.livestreamapp.viewmodels.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_login.*
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
 
-    private lateinit var loginViewModel: LoginViewModel
+    private val loginViewModel: LoginViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,8 +34,6 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loginViewModel = (activity as MainActivity).fetchLoginViewModel()
-
         observerLoadingProgress()
 
         to_register_page_btn.setOnClickListener {

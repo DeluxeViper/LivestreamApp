@@ -11,6 +11,7 @@ import com.deluxe_viper.livestreamapp.R
 import com.pedro.encoder.input.video.CameraOpenException
 import com.pedro.rtmp.utils.ConnectCheckerRtmp
 import com.pedro.rtplibrary.rtmp.RtmpCamera1
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_live_broadcast.*
 import java.io.File
 import java.io.IOException
@@ -22,6 +23,7 @@ import java.util.*
  * Use the [LiveBroadcastFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@AndroidEntryPoint
 class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListener,
     SurfaceHolder.Callback {
 

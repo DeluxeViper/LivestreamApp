@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.deluxe_viper.livestreamapp.R
 import com.pedro.vlc.VlcListener
 import com.pedro.vlc.VlcVideoLibrary
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_stream_player.*
 import java.util.*
 
@@ -18,6 +19,7 @@ import java.util.*
  * Use the [StreamPlayerFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@AndroidEntryPoint
 class StreamPlayerFragment : Fragment(), VlcListener, View.OnClickListener {
     private lateinit var vlcVideoLibrary: VlcVideoLibrary
 

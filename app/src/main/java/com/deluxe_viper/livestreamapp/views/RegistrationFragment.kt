@@ -7,12 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.MainActivity
 import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.utils.ResultOf
 import com.deluxe_viper.livestreamapp.viewmodels.LoginViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_registration.*
 
 /**
@@ -20,14 +22,10 @@ import kotlinx.android.synthetic.main.fragment_registration.*
  * Use the [RegistrationFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@AndroidEntryPoint
 class RegistrationFragment : Fragment() {
 
-    private lateinit var loginViewModel: LoginViewModel
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        loginViewModel = (activity as MainActivity).fetchLoginViewModel()
-    }
+    private val loginViewModel: LoginViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

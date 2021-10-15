@@ -1,14 +1,18 @@
 package com.deluxe_viper.livestreamapp.viewmodels
 
 import androidx.lifecycle.*
+import com.deluxe_viper.livestreamapp.IoDispatcher
 import com.deluxe_viper.livestreamapp.utils.ResultOf
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel(private val dispatcher: CoroutineDispatcher) : ViewModel(), LifecycleObserver {
+@HiltViewModel
+class LoginViewModel @Inject constructor(@IoDispatcher private val dispatcher: CoroutineDispatcher) : ViewModel(), LifecycleObserver {
 
     private var auth: FirebaseAuth? = null
     private var loading: MutableLiveData<Boolean> = MutableLiveData()
@@ -24,7 +28,7 @@ class LoginViewModel(private val dispatcher: CoroutineDispatcher) : ViewModel(),
     fun signIn(email: String, password: String) {
         loading.postValue(true)
         viewModelScope.launch(dispatcher) {
-            val errorCode = -1
+            var errorCode = -1
             try {
                 auth?.let { login ->
                     login.signInWithEmailAndPassword(email, password)
@@ -129,6 +133,6 @@ class LoginViewModel(private val dispatcher: CoroutineDispatcher) : ViewModel(),
             }
         }
     }
-
+    
     fun fetchLoading(): LiveData<Boolean> = loading
 }
