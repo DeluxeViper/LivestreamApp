@@ -163,7 +163,7 @@ class MapsFragment : Fragment() {
                 // Not the logged in user
                 map.addMarker(
                     MarkerOptions().position(latLng)
-                        .title("${it.email} is currently here")
+                        .title("${it.email ?: "Anonymous"} is currently here")
                 )
             } else if (loggedInUser != null && it.uuid == loggedInUser.uid) {
                 // Logged in user (move to marker)
@@ -201,13 +201,10 @@ class MapsFragment : Fragment() {
         } else {
             fusedLocClient.lastLocation.addOnCompleteListener {
                 val location = it.result
-
-                val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-                val locationRef: DatabaseReference = database.getReference("location")
                 if (location != null) {
                     val locationInfo = LocationInfo(location.latitude, location.longitude);
-
-                    userViewModel.saveUserLocation((activity as MainActivity).getCurrentUser()!!.uid, locationInfo)
+                    val currentUser = (activity as MainActivity).getCurrentUser();
+                    userViewModel.saveUserLocation(currentUser!!.uid, currentUser.email.toString(), locationInfo)
 //                    val latLng = LatLng(location.latitude, location.longitude)
 //
 //                    map.addMarker(MarkerOptions().position(latLng).title("You are currently here!"))

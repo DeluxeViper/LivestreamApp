@@ -79,7 +79,7 @@ class UserViewModel @Inject constructor(@IoDispatcher private val dispatcher: Co
 
     private val _saveUserLocationResult = MutableLiveData<ResultOf<String>>()
     val saveUserLocationResult: LiveData<ResultOf<String>> = _saveUserLocationResult
-    fun saveUserLocation(uuid: String, location: LocationInfo) {
+    fun saveUserLocation(uuid: String, email: String, location: LocationInfo) {
         loading.postValue(true)
         viewModelScope.launch(dispatcher) {
             var errorCode = -1
@@ -87,6 +87,9 @@ class UserViewModel @Inject constructor(@IoDispatcher private val dispatcher: Co
                 userRef = database.getReference(Constants.USER_REF)
                 userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
+                        if (!snapshot.child(uuid).child("email").exists()) {
+                            userRef.child(uuid).child("email").setValue(email)
+                        }
                         userRef.child(uuid).child(Constants.LOCATION_REF).setValue(location).addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 _saveUserLocationResult.postValue(ResultOf.Success("Successfully saved user location"))

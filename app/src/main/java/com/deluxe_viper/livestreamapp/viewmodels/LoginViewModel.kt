@@ -133,6 +133,6 @@ class LoginViewModel @Inject constructor(@IoDispatcher private val dispatcher: C
             }
         }
     }
-    
+
     fun fetchLoading(): LiveData<Boolean> = loading
 }
