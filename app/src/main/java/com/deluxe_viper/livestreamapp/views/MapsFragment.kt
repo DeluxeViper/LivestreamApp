@@ -44,8 +44,22 @@ class MapsFragment : Fragment() {
     private val userViewModel: UserViewModel by viewModels()
 
     private val callback = OnMapReadyCallback { googleMap ->
+
+        googleMap.setOnMarkerClickListener {
+            marker ->
+            if (marker.tag == "STREAMING") {
+                findNavController().navigate(R.id.action_mapsFragment_to_streamPlayerFragment)
+            }
+            true
+        }
         map = googleMap
         getCurrentLocation()
+
+//        map.setOnMarkerClickListener {
+//            if (it.tag.toString() === "STREAMING") {
+//
+//            }
+//        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,11 +178,12 @@ class MapsFragment : Fragment() {
                 // Not the logged in user
                 val markerColor = if (it.isStreaming) BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) else BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
                 val markerString = if (it.isStreaming) "${it.email} is currently STREAMING" else "${it.email ?: "Anonymous"} is currently here"
+                val markerTag = if (it.isStreaming) "STREAMING" else ""
                 map.addMarker(
                     MarkerOptions().position(latLng)
                         .title(markerString)
                         .icon(markerColor)
-                )
+                )?.setTag(markerTag)
             } else if (loggedInUser != null && it.uuid == loggedInUser.uid) {
                 // Logged in user (move to marker)
                 map.addMarker(MarkerOptions().position(latLng).title("You are currently here"))

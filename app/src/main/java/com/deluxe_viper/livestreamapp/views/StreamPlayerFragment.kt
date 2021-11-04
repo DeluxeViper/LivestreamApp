@@ -66,7 +66,8 @@ class StreamPlayerFragment : Fragment(), VlcListener, View.OnClickListener {
 
     companion object {
         private val options = ":fullscreen"
-        val playerLink = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
+//        val playerLink = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
+        val playerLink = "rtmp://192.168.0.99/live"
         private const val TAG = "StreamPlayerFragment"
 
         @JvmStatic
