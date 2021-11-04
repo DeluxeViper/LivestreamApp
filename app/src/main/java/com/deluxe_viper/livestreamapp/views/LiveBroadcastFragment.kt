@@ -1,13 +1,18 @@
 package com.deluxe_viper.livestreamapp.views
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.viewModels
+import com.deluxe_viper.livestreamapp.MainActivity
 import com.deluxe_viper.livestreamapp.R
+import com.deluxe_viper.livestreamapp.utils.ResultOf
+import com.deluxe_viper.livestreamapp.viewmodels.UserViewModel
 import com.pedro.encoder.input.video.CameraOpenException
 import com.pedro.rtmp.utils.ConnectCheckerRtmp
 import com.pedro.rtplibrary.rtmp.RtmpCamera1
@@ -30,6 +35,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
     private var rtmpCamera1: RtmpCamera1? = null
     private var currDateAndTime: String = ""
     private var folder: File? = null // File to save recording within
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +55,8 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
         rtmpCamera1!!.setReTries(10)
 
         broadcasterSurfaceView.holder.addCallback(this)
+
+        observeIsStreaming()
     }
 
     override fun onAuthErrorRtmp() {
@@ -104,6 +112,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
                     if (rtmpCamera1!!.isRecording || rtmpCamera1!!.prepareAudio() && rtmpCamera1!!.prepareVideo()) {
                         bStartStopStream.setText("Stop stream")
                         rtmpCamera1!!.startStream(streamUrl)
+                        setIsStreaming(true)
                     } else {
                         Toast.makeText(
                             activity,
@@ -114,6 +123,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
                 } else {
                     bStartStopStream.setText("Start stream")
                     rtmpCamera1!!.stopStream()
+                    setIsStreaming(false)
                 }
                 return
             }
@@ -165,6 +175,32 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
         }
     }
 
+    private fun setIsStreaming(streaming: Boolean) {
+        val currentUser = (activity as MainActivity).getCurrentUser()
+        if (currentUser != null) {
+            Log.d(TAG, "fetchUserLocationsFromFirebase: fetching user locations")
+            userViewModel.setIsStreaming(currentUser.uid, streaming)
+        }
+    }
+
+    private fun observeIsStreaming() {
+        userViewModel.saveIsStreamingResult.observe(viewLifecycleOwner, { result ->
+            result?.let {
+                when (it) {
+                    is ResultOf.Success -> {
+                        if (it.value.equals("Successfully saved streaming boolean.", ignoreCase = true)) {
+                            Log.d(TAG, "observeUserLocationSaved: Successfully saved streaming boolean.")
+                        }
+                    }
+                    is ResultOf.Failure -> {
+                        val failedMessage = it.message ?: "Unknown Error"
+                        Toast.makeText(requireContext(), "Unable to retrieve user location: $failedMessage", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        })
+    }
+
     override fun surfaceCreated(p0: SurfaceHolder) {
     }
 
@@ -191,7 +227,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
     companion object {
         private const val TAG = "LiveBroadcastFragment"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-        private const val streamUrl = "rtmp://192.168.0.80/myapp"
+        private const val streamUrl = "rtmp://192.168.0.99/live"
 
         // VLC: rtmp://192.168.0.80/myapp
 

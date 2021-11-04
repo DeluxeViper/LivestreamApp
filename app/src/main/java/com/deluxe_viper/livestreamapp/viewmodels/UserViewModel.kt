@@ -8,6 +8,7 @@ import com.deluxe_viper.livestreamapp.models.LocationInfo
 import com.deluxe_viper.livestreamapp.models.UserInfo
 import com.deluxe_viper.livestreamapp.utils.Constants
 import com.deluxe_viper.livestreamapp.utils.ResultOf
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,6 +19,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(@IoDispatcher private val dispatcher: CoroutineDispatcher) : ViewModel(), LifecycleObserver {
 
     private val TAG = "UserViewModel"
+    private var auth: FirebaseAuth? = null
     private var loading: MutableLiveData<Boolean> = MutableLiveData()
     private var database: FirebaseDatabase
     private var userRef: DatabaseReference
@@ -25,6 +27,7 @@ class UserViewModel @Inject constructor(@IoDispatcher private val dispatcher: Co
 
     init {
         loading.postValue(false)
+        auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
         userRef = database.getReference(Constants.USER_REF)
         locationRef = userRef.child(Constants.LOCATION_REF)
@@ -52,7 +55,20 @@ class UserViewModel @Inject constructor(@IoDispatcher private val dispatcher: Co
                             if (userInfo != null) {
                                 userInfo.uuid = userSnapshot.key
                                 userInfo.locationInfo = userSnapshot.child(Constants.LOCATION_REF).getValue(LocationInfo::class.java)
-                                mutableUserList.add(userInfo)
+                                if (userSnapshot.child("isLoggedIn").exists()) {
+                                    userInfo.isLoggedIn = userSnapshot.child("isLoggedIn").value as Boolean
+                                }
+                                if (userSnapshot.child("isStreaming").exists()) {
+                                    userInfo.isStreaming = userSnapshot.child("isStreaming").value as Boolean
+                                }
+                                Log.d(TAG, "onDataChange: $userInfo")
+                                if (userInfo.isLoggedIn && userInfo.locationInfo != null) {
+                                    auth?.currentUser?.let {
+                                        if (it.email != userInfo.email) {
+                                            mutableUserList.add(userInfo)
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -99,7 +115,7 @@ class UserViewModel @Inject constructor(@IoDispatcher private val dispatcher: Co
                                 loading.postValue(false)
                             }
                         }.addOnFailureListener {
-                            _saveUserLocationResult.postValue(ResultOf.Success("Save User Location Failed"))
+                            _saveUserLocationResult.postValue(ResultOf.Failure("Save User Location Failed", it))
                             loading.postValue(false)
                         }
                     }
@@ -120,6 +136,46 @@ class UserViewModel @Inject constructor(@IoDispatcher private val dispatcher: Co
             }
         }
     }
+
+    private val _saveIsStreamingResult = MutableLiveData<ResultOf<String>>()
+    val saveIsStreamingResult: LiveData<ResultOf<String>> = _saveIsStreamingResult
+    fun setIsStreaming(uuid: String, isStreaming: Boolean) {
+        loading.postValue(true)
+        viewModelScope.launch(dispatcher) {
+            var errorCode = -1
+            try {
+                userRef = database.getReference(Constants.USER_REF)
+                userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        userRef.child(uuid).child("isStreaming").setValue(isStreaming).addOnCompleteListener {
+                            task ->
+                            if (task.isSuccessful) {
+                                _saveIsStreamingResult.postValue(ResultOf.Success("Successfully saved streaming boolean."))
+                                loading.postValue(false)
+                            } else {
+                                _saveIsStreamingResult.postValue(ResultOf.Success("Failed saving streaming boolean."))
+                            }
+                        }.addOnFailureListener {
+                            _saveIsStreamingResult.postValue(ResultOf.Failure("Failed saving streaming boolean", it))
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.d(TAG, "onCancelled: Error: ${error}")
+                    }
+                })
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+                loading.postValue(false)
+                if (errorCode != -1) {
+                    _saveIsStreamingResult.postValue(ResultOf.Failure("Failed with Error Code ${errorCode}", e))
+                } else {
+                    _saveIsStreamingResult.postValue(ResultOf.Failure("Failed with Exception: ${e.message}", e))
+                }
+            }
+        }
+    }
+
 
     fun fetchLoading(): LiveData<Boolean> = loading
 }

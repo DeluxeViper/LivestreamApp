@@ -27,6 +27,7 @@ import com.deluxe_viper.livestreamapp.viewmodels.UserViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.database.DatabaseReference
@@ -88,7 +89,7 @@ class MapsFragment : Fragment() {
     }
 
     private fun observeUserLocationSaved() {
-        userViewModel.saveUserLocationResult.observe(viewLifecycleOwner, Observer { result ->
+        userViewModel.saveUserLocationResult.observe(viewLifecycleOwner, { result ->
             result?.let {
                 when (it) {
                     is ResultOf.Success -> {
@@ -161,9 +162,12 @@ class MapsFragment : Fragment() {
             val latLng = LatLng(it.locationInfo!!.latitude!!, it.locationInfo!!.longitude!!)
             if (loggedInUser != null && it.uuid != loggedInUser.uid) {
                 // Not the logged in user
+                val markerColor = if (it.isStreaming) BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) else BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                val markerString = if (it.isStreaming) "${it.email} is currently STREAMING" else "${it.email ?: "Anonymous"} is currently here"
                 map.addMarker(
                     MarkerOptions().position(latLng)
-                        .title("${it.email ?: "Anonymous"} is currently here")
+                        .title(markerString)
+                        .icon(markerColor)
                 )
             } else if (loggedInUser != null && it.uuid == loggedInUser.uid) {
                 // Logged in user (move to marker)
@@ -192,6 +196,7 @@ class MapsFragment : Fragment() {
     }
 
     private fun getCurrentLocation() {
+        Log.d(TAG, "getCurrentLocation: getting current location");
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -205,15 +210,6 @@ class MapsFragment : Fragment() {
                     val locationInfo = LocationInfo(location.latitude, location.longitude);
                     val currentUser = (activity as MainActivity).getCurrentUser();
                     userViewModel.saveUserLocation(currentUser!!.uid, currentUser.email.toString(), locationInfo)
-//                    val latLng = LatLng(location.latitude, location.longitude)
-//
-//                    map.addMarker(MarkerOptions().position(latLng).title("You are currently here!"))
-//                    val update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
-//
-//                    map.moveCamera(update)
-//
-//                    locationRef.setValue(locationInfo) // Save the location data to the database
-                    Log.d(TAG, "getCurrentLocation: $location")
                 } else {
                     Log.e(TAG, "No location found")
                 }
