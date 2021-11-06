@@ -12,35 +12,35 @@
         android:id="@+id/broadcasterSurfaceView"/>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_gravity="bottom"
+        android:layout_gravity="end|top"
         android:layout_margin="20dp"
         android:gravity="center"
         >
 
-        <Button
-            android:text="Start Record"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:id="@+id/bRecord"
-            />
+<!--        <Button-->
+<!--            android:text="Start Record"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginEnd="5dp"-->
+<!--            android:id="@+id/bRecord"-->
+<!--            />-->
+
+<!--        <Button-->
+<!--            android:text="Start Stream"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginEnd="5dp"-->
+<!--            android:id="@+id/bStartStopStream"-->
+<!--            />-->
 
         <Button
-            android:text="Start Stream"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:id="@+id/bStartStopStream"
-            />
-
-        <Button
-            android:text="Switch camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bSwitchCamera"
+            android:background="@drawable/ic_baseline_flip_camera_ios_24"
             />
     </LinearLayout>
 
