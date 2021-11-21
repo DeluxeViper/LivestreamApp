@@ -1,4 +1,4 @@
-package com.deluxe_viper.livestreamapp.views
+package com.deluxe_viper.livestreamapp.presentation.auth.login
 
 import android.os.Bundle
 import android.text.TextUtils
@@ -10,12 +10,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.deluxe_viper.livestreamapp.MainActivity
 import com.deluxe_viper.livestreamapp.R
-import com.deluxe_viper.livestreamapp.utils.ResultOf
-import com.deluxe_viper.livestreamapp.viewmodels.LoginViewModel
-import com.deluxe_viper.livestreamapp.viewmodels.UserViewModel
+import com.deluxe_viper.livestreamapp.models.Result
+import com.deluxe_viper.livestreamapp.core.utils.ResultOf
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_login.*
 
@@ -53,7 +53,36 @@ class LoginFragment : Fragment() {
 
     private fun signIn(email: String, password: String) {
         loginViewModel.signIn(email, password)
+        login2ViewModel.login(email, password)
         observeSignIn()
+    }
+
+    private fun observeLogin() {
+//        login2ViewModel.signInStatus.observe(viewLifecycleOwner, {
+//            result ->
+//                result?.let {
+//                    when (it) {
+//                        is
+//                    }
+//                }
+//        })
+        lifecycleScope.launchWhenStarted {
+            login2ViewModel.signInStatus.collect {
+                when (it.status) {
+                    Result.Status.SUCCESS -> {
+                        Snackbar.make(requireView(), "Successfully logged in", Snackbar.LENGTH_LONG).show()
+                    }
+                    Result.Status.ERROR -> {
+
+                    }
+                }
+
+//                when(it.data) {
+//                    is
+//                }
+            }
+        }
+//        login2ViewModel.signInStatus.collect
     }
 
     private fun observeSignIn() {

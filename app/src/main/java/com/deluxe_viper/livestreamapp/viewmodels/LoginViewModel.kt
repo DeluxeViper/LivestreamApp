@@ -3,8 +3,8 @@ package com.deluxe_viper.livestreamapp.viewmodels
 import android.util.Log
 import androidx.lifecycle.*
 import com.deluxe_viper.livestreamapp.IoDispatcher
-import com.deluxe_viper.livestreamapp.utils.Constants
-import com.deluxe_viper.livestreamapp.utils.ResultOf
+import com.deluxe_viper.livestreamapp.core.utils.Constants
+import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth

@@ -1,13 +1,12 @@
 package com.deluxe_viper.livestreamapp.viewmodels
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.*
 import com.deluxe_viper.livestreamapp.IoDispatcher
 import com.deluxe_viper.livestreamapp.models.LocationInfo
 import com.deluxe_viper.livestreamapp.models.UserInfo
-import com.deluxe_viper.livestreamapp.utils.Constants
-import com.deluxe_viper.livestreamapp.utils.ResultOf
+import com.deluxe_viper.livestreamapp.core.utils.Constants
+import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import dagger.hilt.android.lifecycle.HiltViewModel

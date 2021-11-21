@@ -1,4 +1,4 @@
-package com.deluxe_viper.livestreamapp.views
+package com.deluxe_viper.livestreamapp.presentation.auth.register
 
 import android.os.Bundle
 import android.text.TextUtils
@@ -10,9 +10,8 @@ import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.deluxe_viper.livestreamapp.MainActivity
 import com.deluxe_viper.livestreamapp.R
-import com.deluxe_viper.livestreamapp.utils.ResultOf
+import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.deluxe_viper.livestreamapp.viewmodels.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_registration.*

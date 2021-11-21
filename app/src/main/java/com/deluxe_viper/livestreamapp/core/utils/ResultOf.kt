@@ -1,4 +1,4 @@
-package com.deluxe_viper.livestreamapp.utils
+package com.deluxe_viper.livestreamapp.core.utils
 
 sealed class ResultOf<out T> {
     data class Success<out R>(val value: R) : ResultOf<R>()

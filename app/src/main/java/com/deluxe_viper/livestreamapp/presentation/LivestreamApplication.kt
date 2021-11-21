@@ -1,4 +1,4 @@
-package com.deluxe_viper.livestreamapp
+package com.deluxe_viper.livestreamapp.presentation
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

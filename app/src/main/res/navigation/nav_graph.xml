@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.deluxe_viper.livestreamapp.views.LoginFragment"
+        android:name="com.deluxe_viper.livestreamapp.presentation.auth.login.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
@@ -28,7 +28,7 @@
     </fragment>
     <fragment
         android:id="@+id/mapsFragment"
-        android:name="com.deluxe_viper.livestreamapp.views.MapsFragment"
+        android:name="com.deluxe_viper.livestreamapp.presentation.main.maps.MapsFragment"
         android:label="fragment_maps"
         tools:layout="@layout/fragment_maps" >
         <action
@@ -52,7 +52,7 @@
     </fragment>
     <fragment
         android:id="@+id/registrationFragment"
-        android:name="com.deluxe_viper.livestreamapp.views.RegistrationFragment"
+        android:name="com.deluxe_viper.livestreamapp.presentation.auth.register.RegistrationFragment"
         android:label="fragment_registration"
         tools:layout="@layout/fragment_registration" >
         <action

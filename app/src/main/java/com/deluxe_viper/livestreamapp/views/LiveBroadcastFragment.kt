@@ -9,9 +9,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.deluxe_viper.livestreamapp.MainActivity
+import com.deluxe_viper.livestreamapp.presentation.MainActivity
 import com.deluxe_viper.livestreamapp.R
-import com.deluxe_viper.livestreamapp.utils.ResultOf
+import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.deluxe_viper.livestreamapp.viewmodels.UserViewModel
 import com.pedro.encoder.input.video.CameraOpenException
 import com.pedro.rtmp.utils.ConnectCheckerRtmp
@@ -20,12 +20,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_live_broadcast.*
 import java.io.File
-import java.io.IOException
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.SocketException
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.concurrent.schedule
 
@@ -81,11 +79,9 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
 
         broadcasterSurfaceView.holder.addCallback(this)
 
-//        Log.d(TAG, "onViewCreated: startlivestreambutton: " + start_livestream_button.drawable)
         Log.d(TAG, "onViewCreated: ${getdeviceIpAddress()}")
         observeIsStreaming()
 
-//        startStreaming()
     }
 
     override fun onStart() {
@@ -294,7 +290,7 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
     companion object {
         private const val TAG = "LiveBroadcastFragment"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-        private const val streamUrl = "rtmp://192.168.0.99/live"
+        private const val streamUrl = "rtmp://192.168.0.99/live/67qwert"
 
         // VLC: rtmp://192.168.0.80/myapp
 

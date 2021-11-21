@@ -1,11 +1,10 @@
-package com.deluxe_viper.livestreamapp.views
+package com.deluxe_viper.livestreamapp.presentation.main.maps
 
 import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,11 +16,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.deluxe_viper.livestreamapp.MainActivity
+import com.deluxe_viper.livestreamapp.presentation.MainActivity
 import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.models.LocationInfo
 import com.deluxe_viper.livestreamapp.models.UserInfo
-import com.deluxe_viper.livestreamapp.utils.ResultOf
+import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.deluxe_viper.livestreamapp.viewmodels.LoginViewModel
 import com.deluxe_viper.livestreamapp.viewmodels.UserViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -30,8 +29,6 @@ import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
