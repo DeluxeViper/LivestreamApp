@@ -1,5 +1,6 @@
 package com.deluxe_viper.livestreamapp.presentation.session
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
 import com.deluxe_viper.livestreamapp.business.domain.models.AuthToken
@@ -31,6 +32,18 @@ class SessionManager @Inject constructor(
 //        sessionScope.launch {
 ////            appDataStoreManager
 ////        }
+    }
+
+    fun removeHeadFromQueue(){
+        sessionState.value?.let { state ->
+            try {
+                val queue = state.queue
+                queue.remove() // can throw exception if empty
+                this.sessionState.value = state.copy(queue = queue)
+            }catch (e: Exception){
+                Log.d(TAG, "removeHeadFromQueue: Nothing to remove from DialogQueue")
+            }
+        }
     }
 
     private fun appendToMessageQueue(stateMessage: StateMessage){

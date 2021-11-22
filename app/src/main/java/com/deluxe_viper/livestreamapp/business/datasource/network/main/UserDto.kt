@@ -5,7 +5,7 @@ data class UserDto(
     val id: String,
     val isLoggedIn: Boolean,
     val isStreaming: Boolean,
-    val locationInfo: Any,
+    val locationInfo: LocationDto,
     val password: String,
     val roleDtos: List<RoleDto>,
     val streamUrl: String

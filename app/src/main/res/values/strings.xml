@@ -12,4 +12,12 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+
+    <string name="text_success">Success</string>
+    <string name="text_error">Error</string>
+    <string name="text_ok">OK</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="text_info">Info</string>
+    <string name="text_confirm">Are you Sure?</string>
+    <string name="text_yes">Yes</string>
 </resources>

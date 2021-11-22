@@ -1,4 +1,4 @@
-package com.deluxe_viper.livestreamapp.views
+package com.deluxe_viper.livestreamapp.presentation.main.stream_play
 
 import android.os.Bundle
 import android.util.Log

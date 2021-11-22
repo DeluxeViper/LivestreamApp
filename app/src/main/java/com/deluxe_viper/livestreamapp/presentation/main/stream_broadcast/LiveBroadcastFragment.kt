@@ -1,4 +1,4 @@
-package com.deluxe_viper.livestreamapp.views
+package com.deluxe_viper.livestreamapp.presentation.main.stream_broadcast
 
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.deluxe_viper.livestreamapp.presentation.MainActivity
+import com.deluxe_viper.livestreamapp.presentation.main.MainActivity
 import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.deluxe_viper.livestreamapp.viewmodels.UserViewModel

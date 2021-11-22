@@ -40,6 +40,10 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -100,6 +104,8 @@ dependencies {
     /// Datastore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
+    // Material Dialog
+    implementation "com.afollestad.material-dialogs:core:3.1.0"
 }
 
 // Allow references to generated code

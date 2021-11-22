@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/auth_nav_graph"
+    app:startDestination="@id/hilt_LoginFragment">
+
+    <fragment
+        android:id="@+id/hilt_RegistrationFragment"
+        android:name="com.deluxe_viper.livestreamapp.views.Hilt_RegistrationFragment"
+        android:label="Hilt_RegistrationFragment" >
+        <action
+            android:id="@+id/action_hilt_RegistrationFragment_to_hilt_LoginFragment"
+            app:destination="@id/hilt_LoginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/hilt_LoginFragment"
+        android:name="com.deluxe_viper.livestreamapp.views.Hilt_LoginFragment"
+        android:label="Hilt_LoginFragment" >
+        <action
+            android:id="@+id/action_hilt_LoginFragment_to_hilt_RegistrationFragment"
+            app:destination="@id/hilt_RegistrationFragment" />
+    </fragment>
+</navigation>

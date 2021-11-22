@@ -1,5 +1,6 @@
 package com.deluxe_viper.livestreamapp.presentation.auth.login
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,11 +24,23 @@ class LoginViewModel @Inject constructor(
 
     val state: MutableLiveData<LoginState> = MutableLiveData(LoginState())
 
+    fun removeHeadFromQueue(){
+        state.value?.let { state ->
+            try {
+                val queue = state.queue
+                queue.remove() // can throw exception if empty
+                this.state.value = state.copy(queue = queue)
+            }catch (e: Exception){
+                Log.d(TAG, "removeHeadFromQueue: Nothing to remove from DialogQueue")
+            }
+        }
+    }
+
     private fun appendToMessageQueue(stateMessage: StateMessage){
         state.value?.let { state ->
             val queue = state.queue
             if(!stateMessage.doesMessageAlreadyExistInQueue(queue = queue)){
-                if(!(stateMessage.response.uiComponentType is UIComponentType.None)){
+                if(stateMessage.response.uiComponentType !is UIComponentType.None){
                     queue.add(stateMessage)
                     this.state.value = state.copy(queue = queue)
                 }
@@ -35,8 +48,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun login(email: String, password: String) {
-        // TODO: Perform form validation
+    fun login(email: String, password: String) {
         state.value?.let { state ->
             login.execute(
                 email = email,
@@ -48,8 +60,8 @@ class LoginViewModel @Inject constructor(
                     sessionManager.login(authToken = it)
                 }
 
-                dataState.stateMessage?.let {
-                    appendToMessageQueue(it)
+                dataState.stateMessage?.let { stateMessage ->
+                    appendToMessageQueue(stateMessage)
                 }
             }
         }?.launchIn(viewModelScope)

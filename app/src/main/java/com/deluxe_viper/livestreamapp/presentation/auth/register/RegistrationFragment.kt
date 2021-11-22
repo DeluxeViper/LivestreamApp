@@ -11,77 +11,74 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
+import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
 import com.deluxe_viper.livestreamapp.core.utils.ResultOf
-import com.deluxe_viper.livestreamapp.viewmodels.LoginViewModel
+import com.deluxe_viper.livestreamapp.databinding.FragmentRegisterBinding
+import com.deluxe_viper.livestreamapp.presentation.auth.BaseAuthFragment
+import com.deluxe_viper.livestreamapp.presentation.util.processQueue
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_registration.*
+import kotlinx.android.synthetic.main.fragment_register.*
 
-/**
- * A simple [Fragment] subclass.
- * Use the [RegistrationFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 @AndroidEntryPoint
-class RegistrationFragment : Fragment() {
+class RegistrationFragment : BaseAuthFragment() {
 
-    private val loginViewModel: LoginViewModel by viewModels()
+    private val registerViewModel: RegisterViewModel by viewModels()
+
+    private var _binding: FragmentRegisterBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_registration, container, false)
+    ): View {
+        _binding = FragmentRegisterBinding.inflate(layoutInflater)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        register_btn.setOnClickListener {
-            if (TextUtils.isEmpty(et_email_address.text.toString()) || TextUtils.isEmpty(et_password.text.toString()) || TextUtils.isEmpty(
-                    et_password2.text.toString()
+        binding.registerBtn.setOnClickListener {
+            if (TextUtils.isEmpty(binding.etEmailAddress.text.toString()) || TextUtils.isEmpty(binding.etPassword.text.toString()) || TextUtils.isEmpty(
+                    binding.etPassword2.text.toString()
                 )
             ) {
                 Toast.makeText(requireContext(), "Input Fields cannot be Empty", Toast.LENGTH_LONG).show()
-            } else if (et_password.text.toString() != et_password2.text.toString()) {
+            } else if (binding.etPassword.text.toString() != binding.etPassword2.text.toString()) {
                 Toast.makeText(requireContext(), "Passwords don't match", Toast.LENGTH_LONG).show()
             } else {
-                doRegistration()
+                register(binding.etEmailAddress.text.toString(), binding.etPassword.text.toString())
             }
         }
-
-        observeRegistration()
+        subscribeObservers()
     }
 
-    private fun observeRegistration() {
-        loginViewModel.registrationStatus.observe(viewLifecycleOwner, Observer { result ->
-            result?.let {
-                when (it) {
-                    is ResultOf.Success -> {
-                        if (it.value.equals("UserCreated", ignoreCase = true)) {
-                            Toast.makeText(requireContext(), "Registration Successful: user created", Toast.LENGTH_LONG).show()
-                            findNavController().navigate(R.id.action_registrationFragment_to_loginFragment)
-                        } else {
-                            Toast.makeText(requireContext(), "Registration Failed: ${it.value}", Toast.LENGTH_LONG).show()
-                        }
-                    }
-
-                    is ResultOf.Failure -> {
-                        val failedMessage = it.message ?: "Unknown Error"
-                        Toast.makeText(requireContext(), "Registration Failed: $failedMessage", Toast.LENGTH_LONG).show()
+    private fun subscribeObservers() {
+        registerViewModel.state.observe(viewLifecycleOwner) { state ->
+            uiCommunicationListener.displayProgressBar(state.isLoading)
+            processQueue(
+                context = context,
+                queue = state.queue,
+                stateMessageCallback = object : StateMessageCallback {
+                    override fun removeMessageFromStack() {
+                        registerViewModel.removeHeadFromQueue()
                     }
                 }
-            }
-        })
+            )
+        }
     }
 
-    private fun doRegistration() {
-        loginViewModel.signUp(et_email_address.text.toString(), et_password.text.toString())
+    private fun register(email: String, password: String) {
+        registerViewModel.register(email, password)
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            RegistrationFragment().apply {
-            }
+    override fun onPause() {
+        super.onPause()
+//        cacheState()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

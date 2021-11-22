@@ -22,8 +22,8 @@ class Login(
     ): Flow<DataState<AuthToken>> = flow {
         emit(DataState.loading<AuthToken>())
 
+        // Login
         val loginRequest = LoginRequest(email, password)
-
         val loginResponse = service.login(loginRequest)
 
         // Incorrect credentials yield an error message from the server

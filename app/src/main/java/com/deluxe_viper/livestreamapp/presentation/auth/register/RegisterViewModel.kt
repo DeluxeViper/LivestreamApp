@@ -1,5 +1,6 @@
 package com.deluxe_viper.livestreamapp.presentation.auth.register
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,6 +23,18 @@ class RegisterViewModel @Inject constructor(
 
     val state: MutableLiveData<RegisterState> = MutableLiveData(RegisterState())
 
+    fun removeHeadFromQueue(){
+        state.value?.let { state ->
+            try {
+                val queue = state.queue
+                queue.remove() // can throw exception if empty
+                this.state.value = state.copy(queue = queue)
+            }catch (e: Exception){
+                Log.d(TAG, "removeHeadFromQueue: Nothing to remove from DialogQueue")
+            }
+        }
+    }
+
     private fun appendToMessageQueue(stateMessage: StateMessage) {
         state.value?.let { state ->
             val queue = state.queue
@@ -34,11 +47,10 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
-    private fun register(
+    fun register(
         email: String,
         password: String
     ) {
-        // TODO: Perform simple validation?
         state.value?.let { state ->
             register.execute(
                 email = email,

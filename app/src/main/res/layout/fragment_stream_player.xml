@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".views.StreamPlayerFragment">
+    tools:context=".presentation.main.stream_play.StreamPlayerFragment">
 
     <SurfaceView
         android:id="@+id/playerSurfaceView"
