@@ -57,7 +57,7 @@ class LoginViewModel @Inject constructor(
                 this.state.value = state.copy(isLoading = dataState.isLoading)
 
                 dataState.data?.let {
-                    sessionManager.login(authToken = it)
+                    sessionManager.login(user = it)
                 }
 
                 dataState.stateMessage?.let { stateMessage ->

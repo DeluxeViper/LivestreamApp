@@ -31,13 +31,11 @@ class AuthModule {
     fun provideLogin(
         service: AuthApiService,
         userDao: UserDao,
-//        authTokenDao: AuthTokenDao,
         appDataStoreManager: AppDataStore,
     ): Login {
         return Login(
             service,
             userDao,
-//            authTokenDao,
             appDataStoreManager
         )
     }

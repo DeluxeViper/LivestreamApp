@@ -1,5 +1,6 @@
 package com.deluxe_viper.livestreamapp.business.datasource.cache.location
 
+import androidx.annotation.NonNull
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -20,7 +21,7 @@ data class LocationInfoEntity(
 
     @PrimaryKey
     @ColumnInfo(name = "user_id")
-    var user_id: String? = null,
+    var user_id: String,
 
     @ColumnInfo(name = "latitude")
     val latitude: Double,
@@ -30,12 +31,9 @@ data class LocationInfoEntity(
 )
 
 fun LocationInfoEntity.toLocationInfo(): LocationInfo {
-    if (user_id == null) {
-        throw Exception("User id cannot be null.")
-    }
 
     return LocationInfo(
-        user_id = user_id!!,
+        user_id = user_id,
         latitude = latitude,
         longitude = longitude
     )

@@ -6,7 +6,6 @@ import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
 import com.deluxe_viper.livestreamapp.business.datasource.network.auth.AuthApiService
 import com.deluxe_viper.livestreamapp.business.datasource.network.auth.network_requests.LoginRequest
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.handleUseCaseException
-import com.deluxe_viper.livestreamapp.business.domain.models.AuthToken
 import com.deluxe_viper.livestreamapp.business.domain.models.User
 import com.deluxe_viper.livestreamapp.business.domain.util.DataState
 import com.deluxe_viper.livestreamapp.business.domain.util.ErrorHandling
@@ -23,8 +22,8 @@ class Login(
     fun execute(
         email: String,
         password: String
-    ): Flow<DataState<AuthToken>> = flow {
-        emit(DataState.loading<AuthToken>())
+    ): Flow<DataState<User>> = flow {
+        emit(DataState.loading<User>())
 
         // Login
         val loginRequest = LoginRequest(email, password)
@@ -36,25 +35,28 @@ class Login(
         }
 
         // Cache user information
-        userDao.insertAndReplace(
-            User(
-                id = loginResponse.userId,
-                email = loginResponse.email,
-                authToken =  loginResponse.token,
-                isLoggedIn = true,
-                isStreaming = false
-            ).toEntity()
+        val currUser = User(
+            id = loginResponse.userId,
+            email = loginResponse.email,
+            authToken =  loginResponse.token,
+            isLoggedIn = true,
+            isStreaming = false,
         )
 
-        // TODO: Is this necessary?
-        val authToken = AuthToken(loginResponse.userId, loginResponse.token)
+        userDao.insertAndReplace(
+            currUser.toEntity()
+        )
 
         // Save authenticated user to datastore for auto-login next time
-        appDataStoreManager.setValue(DataStoreKeys.AUTH_KEY, authToken.token)
+        appDataStoreManager.setValue(DataStoreKeys.AUTH_KEY, loginResponse.token)
         appDataStoreManager.setValue(DataStoreKeys.CURRENT_USER_ID, loginResponse.userId)
 
-        emit(DataState.data(data = authToken, response = null))
+        emit(DataState.data(data = currUser, response = null))
     }.catch { e ->
         emit(handleUseCaseException(e))
+    }
+
+    companion object {
+        const val TAG = "Login"
     }
 }

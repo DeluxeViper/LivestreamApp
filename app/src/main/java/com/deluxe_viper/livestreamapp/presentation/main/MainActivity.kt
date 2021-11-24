@@ -3,6 +3,7 @@ package com.deluxe_viper.livestreamapp.presentation.main
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.viewModels
@@ -13,19 +14,15 @@ import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
 import com.deluxe_viper.livestreamapp.databinding.ActivityMainBinding
 import com.deluxe_viper.livestreamapp.presentation.BaseActivity
 import com.deluxe_viper.livestreamapp.presentation.auth.AuthActivity
-import com.deluxe_viper.livestreamapp.viewmodels.LoginViewModel
 import com.deluxe_viper.livestreamapp.presentation.util.processQueue
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_main.*
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity(), View.OnClickListener {
 
     private lateinit var navController: NavController
     private lateinit var binding: ActivityMainBinding
-
-    private val loginViewModel: LoginViewModel by viewModels()
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -45,6 +42,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         binding.startLivestreamButton.tag = "stream"
         binding.startLivestreamButton.setOnClickListener(this)
 
+        Log.d(TAG, "onCreate: entering mainactivity")
         subscribeObservers()
     }
 
@@ -61,13 +59,14 @@ class MainActivity : BaseActivity(), View.OnClickListener {
                 }
             )
 
-            if (state.authToken == null || state.authToken.userId == "") {
+            if (state.user == null) {
                 navAuthActivity()
             }
         }
     }
 
     private fun navAuthActivity() {
+        Log.d(TAG, "navAuthActivity: navigating to auth activity")
         val intent = Intent(this, AuthActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -77,7 +76,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        loginViewModel.signOut()
+//        loginViewModel.signOut()
     }
 
     override fun expandAppBar() {

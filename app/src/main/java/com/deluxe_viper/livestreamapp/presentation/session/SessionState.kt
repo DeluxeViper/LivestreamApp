@@ -7,8 +7,6 @@ import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
 
 data class SessionState(
     val isLoading: Boolean = false,
-    val authToken: AuthToken? = null,
     val user: User? = null,
-//    val didCheckForPreviousAuthUser: Boolean = false,
     val queue: Queue<StateMessage> = Queue(mutableListOf())
 )

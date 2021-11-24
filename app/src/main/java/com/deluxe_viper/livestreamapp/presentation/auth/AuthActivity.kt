@@ -2,6 +2,7 @@ package com.deluxe_viper.livestreamapp.presentation.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
 import com.deluxe_viper.livestreamapp.databinding.ActivityAuthBinding
@@ -20,6 +21,8 @@ class AuthActivity : BaseActivity() {
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
         subscribeObservers()
+
+        Log.d(TAG, "onCreate: entering authactivity")
     }
 
     private fun subscribeObservers() {
@@ -35,13 +38,14 @@ class AuthActivity : BaseActivity() {
                 }
             )
 
-            if (state.authToken != null && state.authToken.userId != "") {
+            if (state.user != null) {
                 navMainActivity()
             }
         }
     }
 
     private fun navMainActivity() {
+        Log.d(TAG, "navMainActivity: navigating to main activity")
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

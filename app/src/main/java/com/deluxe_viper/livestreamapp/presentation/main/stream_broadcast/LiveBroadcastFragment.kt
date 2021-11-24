@@ -8,17 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import com.deluxe_viper.livestreamapp.presentation.main.MainActivity
 import com.deluxe_viper.livestreamapp.R
-import com.deluxe_viper.livestreamapp.core.utils.ResultOf
-import com.deluxe_viper.livestreamapp.viewmodels.UserViewModel
+import com.deluxe_viper.livestreamapp.databinding.FragmentLiveBroadcastBinding
 import com.pedro.encoder.input.video.CameraOpenException
 import com.pedro.rtmp.utils.ConnectCheckerRtmp
 import com.pedro.rtplibrary.rtmp.RtmpCamera1
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_live_broadcast.*
 import java.io.File
 import java.net.Inet4Address
 import java.net.InetAddress
@@ -39,7 +34,10 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
     private var rtmpCamera1: RtmpCamera1? = null
     private var currDateAndTime: String = ""
     private var folder: File? = null // File to save recording within
-    private val userViewModel: UserViewModel by viewModels()
+//    private val userViewModel: UserViewModel by viewModels()
+
+    private var _binding: FragmentLiveBroadcastBinding? = null
+    private val binding get() = _binding!!
 
     fun getdeviceIpAddress(): String? {
         try {
@@ -64,7 +62,8 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_live_broadcast, container, false)
+        _binding = FragmentLiveBroadcastBinding.inflate(layoutInflater)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -72,12 +71,12 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
 
 //        bStartStopStream.setOnClickListener(this)
 //        bRecord.setOnClickListener(this)
-        bSwitchCamera.setOnClickListener(this)
+        binding.bSwitchCamera.setOnClickListener(this)
 
-        rtmpCamera1 = RtmpCamera1(broadcasterSurfaceView, this)
+        rtmpCamera1 = RtmpCamera1(binding.broadcasterSurfaceView, this)
         rtmpCamera1!!.setReTries(10)
 
-        broadcasterSurfaceView.holder.addCallback(this)
+        binding.broadcasterSurfaceView.holder.addCallback(this)
 
         Log.d(TAG, "onViewCreated: ${getdeviceIpAddress()}")
         observeIsStreaming()
@@ -228,29 +227,29 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
     }
 
     private fun setIsStreaming(streaming: Boolean) {
-        val currentUser = (activity as MainActivity).getCurrentUser()
-        if (currentUser != null) {
-            Log.d(TAG, "fetchUserLocationsFromFirebase: fetching user locations")
-            userViewModel.setIsStreaming(currentUser.uid, streaming)
-        }
+//        val currentUser = (activity as MainActivity).getCurrentUser()
+//        if (currentUser != null) {
+//            Log.d(TAG, "fetchUserLocationsFromFirebase: fetching user locations")
+//            userViewModel.setIsStreaming(currentUser.uid, streaming)
+//        }
     }
 
     private fun observeIsStreaming() {
-        userViewModel.saveIsStreamingResult.observe(viewLifecycleOwner, { result ->
-            result?.let {
-                when (it) {
-                    is ResultOf.Success -> {
-                        if (it.value.equals("Successfully saved streaming boolean.", ignoreCase = true)) {
-                            Log.d(TAG, "observeUserLocationSaved: Successfully saved streaming boolean.")
-                        }
-                    }
-                    is ResultOf.Failure -> {
-                        val failedMessage = it.message ?: "Unknown Error"
-                        Toast.makeText(requireContext(), "Unable to retrieve user location: $failedMessage", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
-        })
+//        userViewModel.saveIsStreamingResult.observe(viewLifecycleOwner, { result ->
+//            result?.let {
+//                when (it) {
+//                    is ResultOf.Success -> {
+//                        if (it.value.equals("Successfully saved streaming boolean.", ignoreCase = true)) {
+//                            Log.d(TAG, "observeUserLocationSaved: Successfully saved streaming boolean.")
+//                        }
+//                    }
+//                    is ResultOf.Failure -> {
+//                        val failedMessage = it.message ?: "Unknown Error"
+//                        Toast.makeText(requireContext(), "Unable to retrieve user location: $failedMessage", Toast.LENGTH_LONG).show()
+//                    }
+//                }
+//            }
+//        })
     }
 
     override fun surfaceCreated(p0: SurfaceHolder) {

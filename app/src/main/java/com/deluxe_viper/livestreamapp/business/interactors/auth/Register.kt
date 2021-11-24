@@ -21,7 +21,7 @@ class Register(
     fun execute(email: String, password: String): Flow<DataState<out String>> = flow {
         emit(DataState.loading<String>())
 
-        val signupRequest = SignupRequest(email, password, listOf(Role(ERole.ROLE_USER)))
+        val signupRequest = SignupRequest(email, password, listOf(Role(ERole.ROLE_USER.toString())))
         val registerResponse = service.register(
             signupRequest
         )

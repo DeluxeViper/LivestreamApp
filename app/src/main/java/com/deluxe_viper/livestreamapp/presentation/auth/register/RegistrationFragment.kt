@@ -2,24 +2,17 @@ package com.deluxe_viper.livestreamapp.presentation.auth.register
 
 import android.os.Bundle
 import android.text.TextUtils
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
-import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
-import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.deluxe_viper.livestreamapp.databinding.FragmentRegisterBinding
 import com.deluxe_viper.livestreamapp.presentation.auth.BaseAuthFragment
 import com.deluxe_viper.livestreamapp.presentation.util.processQueue
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_register.*
 
-@AndroidEntryPoint
 class RegistrationFragment : BaseAuthFragment() {
 
     private val registerViewModel: RegisterViewModel by viewModels()

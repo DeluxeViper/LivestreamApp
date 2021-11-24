@@ -15,6 +15,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getLocationDao(): LocationDao
 
     companion object {
-        val DATABASE_NAME: String = "livestream_database"
+        const val DATABASE_NAME: String = "livestream_database"
     }
 }

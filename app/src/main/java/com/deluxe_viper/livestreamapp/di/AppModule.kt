@@ -6,6 +6,8 @@ import com.deluxe_viper.livestreamapp.business.datasource.cache.AppDatabase
 import com.deluxe_viper.livestreamapp.business.datasource.cache.AppDatabase.Companion.DATABASE_NAME
 import com.deluxe_viper.livestreamapp.business.datasource.cache.location.LocationDao
 import com.deluxe_viper.livestreamapp.business.datasource.cache.user.UserDao
+import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
+import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStoreManager
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.ApiMainService
 import com.deluxe_viper.livestreamapp.business.domain.util.Constants
 import com.google.gson.Gson
@@ -21,6 +23,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
+
+    @Singleton
+    @Provides
+    fun provideDataStoreManager(
+        application: Application
+    ): AppDataStore {
+        return AppDataStoreManager(application)
+    }
 
     @Singleton
     @Provides

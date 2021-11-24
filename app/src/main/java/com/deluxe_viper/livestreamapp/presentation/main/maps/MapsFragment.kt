@@ -9,27 +9,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
-import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.deluxe_viper.livestreamapp.databinding.FragmentMapsBinding
-import com.deluxe_viper.livestreamapp.models.LocationInfo
-import com.deluxe_viper.livestreamapp.models.UserInfo
 import com.deluxe_viper.livestreamapp.presentation.main.BaseMainFragment
-import com.deluxe_viper.livestreamapp.presentation.main.MainActivity
 import com.deluxe_viper.livestreamapp.presentation.util.processQueue
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -42,7 +35,7 @@ class MapsFragment : BaseMainFragment() {
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
 
-    private val mapsViewModel: MapsViewModel by viewModels()
+//    private val mapsViewModel: MapsViewModel by viewModels()
 
     private val callback = OnMapReadyCallback { googleMap ->
 
@@ -53,7 +46,7 @@ class MapsFragment : BaseMainFragment() {
             true
         }
         map = googleMap
-        getCurrentLocation()
+//        getCurrentLocation()
 
 //        map.setOnMarkerClickListener {
 //            if (it.tag.toString() === "STREAMING") {
@@ -67,7 +60,7 @@ class MapsFragment : BaseMainFragment() {
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true /* enabled by default */) {
             override fun handleOnBackPressed() {
                 // Handle the back button event
-                mapsViewModel.logout()
+//                mapsViewModel.logout()
 //                loginViewModel.signOut()
             }
         }
@@ -105,19 +98,19 @@ class MapsFragment : BaseMainFragment() {
     }
 
     private fun subscribeObservers() {
-        mapsViewModel.state.observe(viewLifecycleOwner) { state ->
-            uiCommunicationListener.displayProgressBar(state.isLoading)
-
-            processQueue(context = context,
-                queue = state.queue,
-                stateMessageCallback = object : StateMessageCallback {
-                    override fun removeMessageFromStack() {
-                        mapsViewModel.removeHeadFromQueue()
-                    }
-                })
-
-            // TODO: Set user locations
-        }
+//        mapsViewModel.state.observe(viewLifecycleOwner) { state ->
+//            uiCommunicationListener.displayProgressBar(state.isLoading)
+//
+//            processQueue(context = context,
+//                queue = state.queue,
+//                stateMessageCallback = object : StateMessageCallback {
+//                    override fun removeMessageFromStack() {
+//                        mapsViewModel.removeHeadFromQueue()
+//                    }
+//                })
+//
+//            // TODO: Set user locations
+//        }
     }
 
 //    private fun observeUserLocationSaved() {
@@ -185,40 +178,40 @@ class MapsFragment : BaseMainFragment() {
 //        })
 //    }
 
-    private fun populateMapWithUserLocationMarkers(mutableLocationInfoList: MutableList<UserInfo>) {
-        map.clear()
-        shared = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-
-        val loggedInUser = (activity as MainActivity).getCurrentUser()
-        mutableLocationInfoList.forEach {
-            val latLng = LatLng(it.locationInfo!!.latitude!!, it.locationInfo!!.longitude!!)
-            if (loggedInUser != null && it.uuid != loggedInUser.uid) {
-                // Not the logged in user
-                val markerColor =
-                    if (it.isStreaming) BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) else BitmapDescriptorFactory.defaultMarker(
-                        BitmapDescriptorFactory.HUE_RED
-                    )
-                val markerString = if (it.isStreaming) "${it.email} is currently STREAMING" else "${it.email ?: "Anonymous"} is currently here"
-                val markerTag = if (it.isStreaming) "STREAMING" else ""
-                map.addMarker(
-                    MarkerOptions().position(latLng)
-                        .title(markerString)
-                        .icon(markerColor)
-                )?.setTag(markerTag)
-            } else if (loggedInUser != null && it.uuid == loggedInUser.uid) {
-                // Logged in user (move to marker)
-                map.addMarker(MarkerOptions().position(latLng).title("You are currently here"))
-                val update: CameraUpdate
-                if (shared.getBoolean("initialFetch", true)) {
-                    // Move camera with zoom if fragment is initially opened
-                    update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
-                    map.moveCamera(update)
-                }
-            }
-        }
-
-        shared.edit().putBoolean("InitialFetch", false).apply()
-    }
+//    private fun populateMapWithUserLocationMarkers(mutableLocationInfoList: MutableList<UserInfo>) {
+//        map.clear()
+//        shared = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+//
+//        val loggedInUser = (activity as MainActivity).getCurrentUser()
+//        mutableLocationInfoList.forEach {
+//            val latLng = LatLng(it.locationInfo!!.latitude!!, it.locationInfo!!.longitude!!)
+//            if (loggedInUser != null && it.uuid != loggedInUser.uid) {
+//                // Not the logged in user
+//                val markerColor =
+//                    if (it.isStreaming) BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) else BitmapDescriptorFactory.defaultMarker(
+//                        BitmapDescriptorFactory.HUE_RED
+//                    )
+//                val markerString = if (it.isStreaming) "${it.email} is currently STREAMING" else "${it.email ?: "Anonymous"} is currently here"
+//                val markerTag = if (it.isStreaming) "STREAMING" else ""
+//                map.addMarker(
+//                    MarkerOptions().position(latLng)
+//                        .title(markerString)
+//                        .icon(markerColor)
+//                )?.setTag(markerTag)
+//            } else if (loggedInUser != null && it.uuid == loggedInUser.uid) {
+//                // Logged in user (move to marker)
+//                map.addMarker(MarkerOptions().position(latLng).title("You are currently here"))
+//                val update: CameraUpdate
+//                if (shared.getBoolean("initialFetch", true)) {
+//                    // Move camera with zoom if fragment is initially opened
+//                    update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
+//                    map.moveCamera(update)
+//                }
+//            }
+//        }
+//
+//        shared.edit().putBoolean("InitialFetch", false).apply()
+//    }
 
     private fun setupLocClient() {
         fusedLocClient = LocationServices.getFusedLocationProviderClient(requireActivity())
@@ -243,9 +236,9 @@ class MapsFragment : BaseMainFragment() {
             fusedLocClient.lastLocation.addOnCompleteListener {
                 val location = it.result
                 if (location != null) {
-                    val locationInfo = LocationInfo(location.latitude, location.longitude);
-                    val currentUser = (activity as MainActivity).getCurrentUser();
-                    userViewModel.saveUserLocation(currentUser!!.uid, currentUser.email.toString(), locationInfo)
+//                    val locationInfo = LocationInfo(location.latitude, location.longitude);
+//                    val currentUser = (activity as MainActivity).getCurrentUser();
+//                    userViewModel.saveUserLocation(currentUser!!.uid, currentUser.email.toString(), locationInfo)
                 } else {
                     Log.e(TAG, "No location found")
                 }

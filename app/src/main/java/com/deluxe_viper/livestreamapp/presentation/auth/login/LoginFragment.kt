@@ -8,21 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
-import com.deluxe_viper.livestreamapp.models.Result
-import com.deluxe_viper.livestreamapp.core.utils.ResultOf
 import com.deluxe_viper.livestreamapp.databinding.FragmentLoginBinding
 import com.deluxe_viper.livestreamapp.presentation.auth.BaseAuthFragment
 import com.deluxe_viper.livestreamapp.presentation.util.processQueue
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_login.*
 
-@AndroidEntryPoint
 class LoginFragment : BaseAuthFragment() {
 
     private val loginViewModel: LoginViewModel by viewModels()
@@ -36,6 +29,8 @@ class LoginFragment : BaseAuthFragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentLoginBinding.inflate(layoutInflater)
+
+        Log.d(TAG, "onCreateView: entering loginfragment")
         return binding.root
     }
 
@@ -55,10 +50,11 @@ class LoginFragment : BaseAuthFragment() {
             Log.d(TAG, "onViewCreated: clicked")
             navRegisterFragment()
         }
+
     }
 
     private fun navRegisterFragment() =
-        findNavController().navigate(R.id.action_hilt_LoginFragment_to_hilt_RegistrationFragment)
+        findNavController().navigate(R.id.action_loginFragment_to_registrationFragment)
 
 
     private fun subscribeObservers() {
@@ -80,7 +76,13 @@ class LoginFragment : BaseAuthFragment() {
         loginViewModel.login(email, password)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     companion object {
         const val TAG = "LoginFragment"
     }
+
 }

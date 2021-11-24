@@ -29,7 +29,6 @@ data class UserEntity(
     val token: String? = null,
 
     @Embedded
-    @ColumnInfo(name = "location_info")
     val locationInfo: LocationInfoEntity? = null
 )
 

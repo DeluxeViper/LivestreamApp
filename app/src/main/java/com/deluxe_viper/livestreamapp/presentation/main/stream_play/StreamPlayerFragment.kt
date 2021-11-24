@@ -8,10 +8,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.deluxe_viper.livestreamapp.R
+import com.deluxe_viper.livestreamapp.databinding.FragmentStreamPlayerBinding
 import com.pedro.vlc.VlcListener
 import com.pedro.vlc.VlcVideoLibrary
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_stream_player.*
 import java.util.*
 
 /**
@@ -23,18 +23,22 @@ import java.util.*
 class StreamPlayerFragment : Fragment(), VlcListener, View.OnClickListener {
     private lateinit var vlcVideoLibrary: VlcVideoLibrary
 
+    private var _binding: FragmentStreamPlayerBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_stream_player, container, false)
+        _binding = FragmentStreamPlayerBinding.inflate(layoutInflater)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: ")
-        bStartStopPlayer.setOnClickListener(this)
-        vlcVideoLibrary = VlcVideoLibrary(requireContext(), this, playerSurfaceView)
+        binding.bStartStopPlayer.setOnClickListener(this)
+        vlcVideoLibrary = VlcVideoLibrary(requireContext(), this, binding.playerSurfaceView)
         vlcVideoLibrary.setOptions(Arrays.asList(options));
     }
 
@@ -46,7 +50,7 @@ class StreamPlayerFragment : Fragment(), VlcListener, View.OnClickListener {
         Toast.makeText(activity, "Error, make sure your endpoint is correct", Toast.LENGTH_SHORT)
             .show()
         vlcVideoLibrary.stop()
-        bStartStopPlayer.setText("Start Player")
+        binding.bStartStopPlayer.setText("Start Player")
     }
 
     override fun onClick(view: View?) {
@@ -55,10 +59,10 @@ class StreamPlayerFragment : Fragment(), VlcListener, View.OnClickListener {
                 Log.d(TAG, "onClick: hello")
                 if (!vlcVideoLibrary.isPlaying) {
                     vlcVideoLibrary.play(playerLink)
-                    bStartStopPlayer.setText("Stop Player")
+                    binding.bStartStopPlayer.setText("Stop Player")
                 } else {
                     vlcVideoLibrary.stop()
-                    bStartStopPlayer.setText("Start Player")
+                    binding.bStartStopPlayer.setText("Start Player")
                 }
             }
         }
@@ -66,7 +70,8 @@ class StreamPlayerFragment : Fragment(), VlcListener, View.OnClickListener {
 
     companion object {
         private val options = ":fullscreen"
-//        val playerLink = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
+
+        //        val playerLink = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov"
         val playerLink = "rtmp://192.168.0.99/live"
         private const val TAG = "StreamPlayerFragment"
 

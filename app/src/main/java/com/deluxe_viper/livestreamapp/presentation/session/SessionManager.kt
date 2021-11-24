@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
 import com.deluxe_viper.livestreamapp.business.domain.models.AuthToken
+import com.deluxe_viper.livestreamapp.business.domain.models.User
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
 import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling.Companion.SUCCESS_LOGOUT
 import com.deluxe_viper.livestreamapp.business.domain.util.UIComponentType
@@ -58,9 +59,9 @@ class SessionManager @Inject constructor(
         }
     }
 
-    fun login(authToken: AuthToken) {
+    fun login(user: User) {
         sessionState.value?.let { state ->
-            this.sessionState.value = state.copy(authToken = authToken)
+            this.sessionState.value = state.copy(user = user)
         }
     }
 
@@ -70,9 +71,8 @@ class SessionManager @Inject constructor(
                 this.sessionState.value = state.copy(isLoading = dataState.isLoading)
                 dataState.data?.let { response ->
                     if (response.message.equals(SUCCESS_LOGOUT)) {
-                        this.sessionState.value = state.copy(authToken = null)
+                        this.sessionState.value = state.copy(user = null)
                         clearAuthUser()
-
                     }
                 }
 
@@ -83,6 +83,7 @@ class SessionManager @Inject constructor(
         }
     }
 
+    // TODO: this function isn't necessary
     private fun clearAuthUser() {
         sessionScope.launch {
             appDataStoreManager.setValue(DataStoreKeys.AUTH_USER, "")
