@@ -1,5 +1,6 @@
 package com.deluxe_viper.livestreamapp.di.auth
 
+import com.deluxe_viper.livestreamapp.business.datasource.cache.user.UserDao
 import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
 import com.deluxe_viper.livestreamapp.business.datasource.network.auth.AuthApiService
 import com.deluxe_viper.livestreamapp.business.interactors.auth.Login
@@ -29,13 +30,13 @@ class AuthModule {
     @Provides
     fun provideLogin(
         service: AuthApiService,
-//        accountDao: AccountDao,
+        userDao: UserDao,
 //        authTokenDao: AuthTokenDao,
         appDataStoreManager: AppDataStore,
     ): Login {
         return Login(
             service,
-//            accountDao,
+            userDao,
 //            authTokenDao,
             appDataStoreManager
         )
@@ -45,8 +46,12 @@ class AuthModule {
     @Provides
     fun provideLogout(
         appDataStoreManager: AppDataStore,
-        ): Logout {
-        return Logout(appDataStoreManager)
+        userDao: UserDao
+    ): Logout {
+        return Logout(
+            appDataStoreManager,
+            userDao
+        )
     }
 
     @Singleton

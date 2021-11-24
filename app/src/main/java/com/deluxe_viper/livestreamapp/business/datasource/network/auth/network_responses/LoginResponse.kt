@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 data class LoginResponse (
     val token: String,
     val type: String? = "Bearer",
-    val id: String,
+    val userId: String,
     val email: String,
     val roles: List<Role>,
 

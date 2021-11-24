@@ -1,5 +1,11 @@
 package com.deluxe_viper.livestreamapp.di
 
+import android.app.Application
+import androidx.room.Room
+import com.deluxe_viper.livestreamapp.business.datasource.cache.AppDatabase
+import com.deluxe_viper.livestreamapp.business.datasource.cache.AppDatabase.Companion.DATABASE_NAME
+import com.deluxe_viper.livestreamapp.business.datasource.cache.location.LocationDao
+import com.deluxe_viper.livestreamapp.business.datasource.cache.user.UserDao
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.ApiMainService
 import com.deluxe_viper.livestreamapp.business.domain.util.Constants
 import com.google.gson.Gson
@@ -37,5 +43,27 @@ class AppModule {
         return retrofitBuilder
             .build()
             .create(ApiMainService::class.java)
+    }
+
+    // Local database provisions
+    @Singleton
+    @Provides
+    fun provideAppDb(app: Application): AppDatabase {
+        return Room
+            .databaseBuilder(app, AppDatabase::class.java, DATABASE_NAME)
+            .fallbackToDestructiveMigration() // get correct db version if schema changed
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideUserPropertiesDao(db: AppDatabase): UserDao {
+        return db.getUserPropertiesDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideLocationDao(db: AppDatabase): LocationDao {
+        return db.getLocationDao()
     }
 }

@@ -58,7 +58,7 @@ class LoginFragment : BaseAuthFragment() {
     }
 
     private fun navRegisterFragment() =
-        findNavController().navigate(R.id.action_loginFragment_to_registrationFragment)
+        findNavController().navigate(R.id.action_hilt_LoginFragment_to_hilt_RegistrationFragment)
 
 
     private fun subscribeObservers() {
