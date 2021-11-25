@@ -6,12 +6,17 @@ import androidx.lifecycle.ViewModel
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
 import com.deluxe_viper.livestreamapp.business.domain.util.UIComponentType
 import com.deluxe_viper.livestreamapp.business.domain.util.doesMessageAlreadyExistInQueue
+import com.deluxe_viper.livestreamapp.business.interactors.user.GetUsers
+import com.deluxe_viper.livestreamapp.business.interactors.user.SubscribeToUsers
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class MapsViewModel @Inject constructor(private val sessionManager: SessionManager) : ViewModel() {
+class MapsViewModel @Inject constructor(
+    private val getUsers: GetUsers,
+    private val subscribeToUsers: SubscribeToUsers,
+    private val sessionManager: SessionManager) : ViewModel() {
 
     private val TAG : String = "MapsViewModel"
 
@@ -39,6 +44,15 @@ class MapsViewModel @Inject constructor(private val sessionManager: SessionManag
                 }
             }
         }
+    }
+
+    fun getUsers() {
+
+    }
+
+    fun subscribeToAllLoggedInUserChanges() {
+        // Listen for changes within the user collection
+        // If a change is found, retrieve user id and fetch the user changed,
     }
 
     fun logout() {

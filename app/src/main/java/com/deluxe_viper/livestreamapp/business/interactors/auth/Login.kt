@@ -6,6 +6,7 @@ import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
 import com.deluxe_viper.livestreamapp.business.datasource.network.auth.AuthApiService
 import com.deluxe_viper.livestreamapp.business.datasource.network.auth.network_requests.LoginRequest
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.handleUseCaseException
+import com.deluxe_viper.livestreamapp.business.domain.models.LocationInfo
 import com.deluxe_viper.livestreamapp.business.domain.models.User
 import com.deluxe_viper.livestreamapp.business.domain.util.DataState
 import com.deluxe_viper.livestreamapp.business.domain.util.ErrorHandling
@@ -39,6 +40,7 @@ class Login(
             id = loginResponse.userId,
             email = loginResponse.email,
             authToken =  loginResponse.token,
+            locationInfo = LocationInfo(loginResponse.userId, -200.0, -200.0),
             isLoggedIn = true,
             isStreaming = false,
         )

@@ -14,7 +14,7 @@ interface UserDao {
     suspend fun searchByEmail(email: String): UserEntity
 
     @Query("SELECT * FROM user_properties WHERE user_id = :id")
-    suspend fun searchById(id: String): UserEntity
+    suspend fun searchById(id: String): UserEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAndReplace(user: UserEntity): Long

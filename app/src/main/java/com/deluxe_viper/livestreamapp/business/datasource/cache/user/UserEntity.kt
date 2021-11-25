@@ -29,7 +29,7 @@ data class UserEntity(
     val token: String? = null,
 
     @Embedded
-    val locationInfo: LocationInfoEntity? = null
+    val locationInfo: LocationInfoEntity
 )
 
 fun UserEntity.toUser(): User {
@@ -42,7 +42,7 @@ fun UserEntity.toUser(): User {
         email = email,
         isLoggedIn = isLoggedIn,
         isStreaming =  isStreaming,
-        locationInfo = locationInfo?.toLocationInfo(),
+        locationInfo = locationInfo.toLocationInfo(),
         authToken = token
     )
 }
@@ -53,7 +53,7 @@ fun User.toEntity(): UserEntity {
         email = email,
         isLoggedIn = isLoggedIn,
         isStreaming = isStreaming,
-        locationInfo =  locationInfo?.toEntity(),
+        locationInfo =  locationInfo.toEntity(),
         token = authToken
     )
 }
