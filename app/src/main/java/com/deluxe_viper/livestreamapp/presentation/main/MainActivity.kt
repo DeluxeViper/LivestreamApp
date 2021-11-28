@@ -25,6 +25,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate: ${sessionManager.sessionState.value?.user}")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -74,17 +75,12 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         finish()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-//        loginViewModel.signOut()
-    }
-
     override fun expandAppBar() {
         // ignore
     }
 
     override fun displayProgressBar(isLoading: Boolean) {
-        if (isLoading) {
+        if (isLoading && !isFinishing) {
             binding.progressBar.visibility = View.VISIBLE
         } else {
             binding.progressBar.visibility = View.GONE

@@ -7,7 +7,7 @@ import com.deluxe_viper.livestreamapp.business.datasource.cache.location.Locatio
 import com.deluxe_viper.livestreamapp.business.datasource.cache.user.UserDao
 import com.deluxe_viper.livestreamapp.business.datasource.cache.user.UserEntity
 
-@Database(entities = [UserEntity::class, LocationInfoEntity::class], version = 1)
+@Database(entities = [UserEntity::class, LocationInfoEntity::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun getUserPropertiesDao(): UserDao

@@ -49,6 +49,6 @@ object UserModule {
     fun provideSubscribeToUsers(
         service: ApiMainService,
     ): SubscribeToUsers{
-        return SubscribeToUsers()
+        return SubscribeToUsers(service)
     }
 }

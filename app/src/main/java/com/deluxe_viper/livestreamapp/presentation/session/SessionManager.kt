@@ -67,17 +67,19 @@ class SessionManager @Inject constructor(
 
     fun logout() {
         sessionState.value?.let { state ->
-            logout.execute().onEach { dataState ->
-                this.sessionState.value = state.copy(isLoading = dataState.isLoading)
-                dataState.data?.let { response ->
-                    if (response.message.equals(SUCCESS_LOGOUT)) {
-                        this.sessionState.value = state.copy(user = null)
-                        clearAuthUser()
+            state.user?.let {
+                logout.execute(it).onEach { dataState ->
+                    this.sessionState.value = state.copy(isLoading = dataState.isLoading)
+                    dataState.data?.let { response ->
+                        if (response.message.equals(SUCCESS_LOGOUT)) {
+                            this.sessionState.value = state.copy(user = null)
+                            clearAuthUser()
+                        }
                     }
-                }
 
-                dataState.stateMessage?.let { stateMessage ->
-                    appendToMessageQueue(stateMessage)
+                    dataState.stateMessage?.let { stateMessage ->
+                        appendToMessageQueue(stateMessage)
+                    }
                 }
             }
         }

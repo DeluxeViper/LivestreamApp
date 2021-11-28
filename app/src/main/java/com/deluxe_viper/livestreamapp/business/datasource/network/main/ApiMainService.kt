@@ -2,9 +2,11 @@ package com.deluxe_viper.livestreamapp.business.datasource.network.main
 
 import com.google.gson.JsonObject
 import kotlinx.coroutines.flow.Flow
+import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.http.*
+import java.util.*
 
 interface ApiMainService {
     @GET("/api/users/{email}")
@@ -22,11 +24,12 @@ interface ApiMainService {
         @Header("Authorization") jwtToken: String
     ) : List<UserDto>
 
-    @Headers("Content-Type: application/stream+json")
+    @Headers("accept: application/stream+json")
     @GET(value="/api/users/subscribe")
+    @Streaming
     suspend fun subscribeToUsers(
         @Header("Authorization") jwtToken: String
-    ) : Flow<Any>
+    ) : Flow<JSONObject>
 
     @PUT("/{userId}/updateUserLocation")
     suspend fun updateUserLocation(

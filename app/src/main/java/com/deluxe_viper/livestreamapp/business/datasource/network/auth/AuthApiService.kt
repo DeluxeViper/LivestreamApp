@@ -7,18 +7,18 @@ import com.deluxe_viper.livestreamapp.business.datasource.network.auth.network_r
 import okhttp3.MediaType
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface AuthApiService {
     @POST("/api/auth/signin")
     suspend fun login(@Body loginRequest: LoginRequest): LoginResponse
 
     @POST("/api/auth/signup")
-    suspend fun register(@Body signupRequest : SignupRequest) : GenericResponse
+    suspend fun register(@Body signupRequest: SignupRequest): GenericResponse
 
     @POST("/api/auth/signout")
-    suspend fun signout(@Query("email") email: String) : GenericResponse
+    suspend fun signout(
+        @Header("Authorization") jwtToken: String,
+        @Query("email") email: String
+    ): GenericResponse
 }

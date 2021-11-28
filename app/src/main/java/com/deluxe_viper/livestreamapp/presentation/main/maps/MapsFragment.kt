@@ -35,7 +35,7 @@ class MapsFragment : BaseMainFragment() {
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
 
-//    private val mapsViewModel: MapsViewModel by viewModels()
+    private val mapsViewModel: MapsViewModel by viewModels()
 
     private val callback = OnMapReadyCallback { googleMap ->
 
@@ -57,13 +57,13 @@ class MapsFragment : BaseMainFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val callback: OnBackPressedCallback = object : OnBackPressedCallback(true /* enabled by default */) {
-            override fun handleOnBackPressed() {
-                // Handle the back button event
-//                mapsViewModel.logout()
-//                loginViewModel.signOut()
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true /* enabled by default */) {
+                override fun handleOnBackPressed() {
+                    // Handle the back button event
+                    mapsViewModel.logout()
+                }
             }
-        }
         requireActivity().onBackPressedDispatcher.addCallback(this, callback);
 
         shared = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
@@ -94,23 +94,31 @@ class MapsFragment : BaseMainFragment() {
 //        observeSignout()
 //        observeUserLocationInfoList()
 //        observeUserLocationSaved()
+        populateMapWithUserLocations()
         subscribeObservers()
     }
 
     private fun subscribeObservers() {
-//        mapsViewModel.state.observe(viewLifecycleOwner) { state ->
-//            uiCommunicationListener.displayProgressBar(state.isLoading)
-//
-//            processQueue(context = context,
-//                queue = state.queue,
-//                stateMessageCallback = object : StateMessageCallback {
-//                    override fun removeMessageFromStack() {
-//                        mapsViewModel.removeHeadFromQueue()
-//                    }
-//                })
-//
-//            // TODO: Set user locations
-//        }
+        Log.d(TAG, "subscribeObservers: subscribing observers")
+        mapsViewModel.subscribeToAllUserChanges()
+        mapsViewModel.state.observe(viewLifecycleOwner) { state ->
+            uiCommunicationListener.displayProgressBar(state.isLoading)
+            processQueue(
+                context = context,
+                queue = state.queue,
+                stateMessageCallback = object : StateMessageCallback {
+                    override fun removeMessageFromStack() {
+                        mapsViewModel.removeHeadFromQueue()
+                    }
+                }
+            )
+            // TODO: Set user locations
+        }
+    }
+
+    private fun populateMapWithUserLocations() {
+        Log.d(TAG, "populateMapWithUserLocations: getting all logged in users")
+        mapsViewModel.getUsers(true)
     }
 
 //    private fun observeUserLocationSaved() {

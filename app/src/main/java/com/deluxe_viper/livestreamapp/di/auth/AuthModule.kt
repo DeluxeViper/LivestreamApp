@@ -43,10 +43,12 @@ class AuthModule {
     @Singleton
     @Provides
     fun provideLogout(
+        service: AuthApiService,
         appDataStoreManager: AppDataStore,
         userDao: UserDao
     ): Logout {
         return Logout(
+            service,
             appDataStoreManager,
             userDao
         )
