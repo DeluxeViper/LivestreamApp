@@ -1,6 +1,7 @@
 package com.deluxe_viper.livestreamapp.business.datasource.network.main
 
 import com.google.gson.JsonObject
+import io.reactivex.Observable
 import kotlinx.coroutines.flow.Flow
 import okhttp3.ResponseBody
 import org.json.JSONObject
@@ -24,12 +25,12 @@ interface ApiMainService {
         @Header("Authorization") jwtToken: String
     ) : List<UserDto>
 
-    @Headers("accept: application/stream+json")
+//    @Headers("Content-Type: application/stream+json")
     @GET(value="/api/users/subscribe")
     @Streaming
-    suspend fun subscribeToUsers(
+    fun subscribeToUsers(
         @Header("Authorization") jwtToken: String
-    ) : Flow<JSONObject>
+    ) : Observable<ResponseBody>
 
     @PUT("/{userId}/updateUserLocation")
     suspend fun updateUserLocation(

@@ -12,6 +12,8 @@ class ErrorHandling {
         const val ERROR_AUTH_TOKEN_INVALID = "Authentication token is invalid. Try logging out and logging back in."
         const val ERROR_UNABLE_TO_RETRIEVE_USER = "Unable to retrieve user. Try logging out and logging back in."
         const val ERROR_UNABLE_TO_UPDATE_USER = "Unable to update user. Try logging out and logging back in."
+
+        const val ERROR_OCCURRED_WHILE_RETRIEVING_USER_DATA = "Error occurred while retrieving user data. Try logging out and back in."
     }
 
 }
