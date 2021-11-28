@@ -3,13 +3,11 @@
 ### Motivation
 
 ### Built with
-* Firebase Authentication
-* Firebase Realtime database
 * Kotlin
 * XML
 * Android Studio
 * Gradle
-* MVVVM
+* MVI
 * (upcoming) AWS ECS
 
 ### Setup
