@@ -32,6 +32,10 @@ sealed class MessageType {
 
 interface StateMessageCallback {
     fun removeMessageFromStack()
+
+    fun updateLocations(stateMessage: StateMessage) {
+
+    }
 }
 
 fun StateMessage.doesMessageAlreadyExistInQueue(

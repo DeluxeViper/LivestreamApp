@@ -14,6 +14,17 @@ data class UserDto(
     val roleDtos: List<RoleDto> = listOf()
 )
 
+fun UserDto.addToken(authToken: String): UserDto {
+    return UserDto(
+        email = email,
+        id = id,
+        isLoggedIn = isLoggedIn,
+        isStreaming = isStreaming,
+        locationInfo =  locationInfo,
+        token =  authToken,
+    )
+}
+
 fun UserDto.toUser(): User {
     return User(
         email = email,

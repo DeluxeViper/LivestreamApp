@@ -4,9 +4,9 @@ import android.annotation.SuppressLint
 import android.util.Log
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.ApiMainService
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.handleUseCaseException
-import com.deluxe_viper.livestreamapp.business.domain.util.DataState
-import com.deluxe_viper.livestreamapp.business.domain.util.ErrorHandling
+import com.deluxe_viper.livestreamapp.business.domain.util.*
 import io.reactivex.Observable
+import io.reactivex.functions.Action
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
@@ -29,13 +29,12 @@ import java.util.function.Consumer
 import kotlin.coroutines.startCoroutine
 import kotlin.time.Duration
 
-// WORKS
 class SubscribeToUsers(
     private val service: ApiMainService
 ) {
     @SuppressLint("CheckResult")
     @ExperimentalCoroutinesApi
-    fun execute(authToken: String?) = callbackFlow<DataState<String>> {
+    fun execute(authToken: String?) = callbackFlow {
         trySend(DataState.loading())
 
         val observable = service.subscribeToUsers("Bearer $authToken")
@@ -45,9 +44,16 @@ class SubscribeToUsers(
                 events(responseBody.source())
             }
 
-        observable.subscribe(
+        val disposable = observable.subscribe(
             {
-                trySendBlocking(DataState.data(response = null, data = it))
+                trySendBlocking(DataState.data(
+                    data = it,
+                    response = Response(
+                        message = SuccessHandling.CHANGE_OCCURRED,
+                        uiComponentType = UIComponentType.None(),
+                        messageType = MessageType.Success()
+                    )
+                ))
             },
             {
                 trySendBlocking(DataState.data(response = null, data = it.message))
@@ -55,11 +61,9 @@ class SubscribeToUsers(
         )
 
         awaitClose {
-            observable.unsubscribeOn(Schedulers.io())
-                .toMap {
-                    Log.d(TAG, "execute: $it")
-                }
+            disposable.dispose()
         }
+
     }.catch { e ->
         emit(handleUseCaseException(e))
     }

@@ -21,8 +21,9 @@ object UserModule {
     @Provides
     fun provideGetUser(
         service: ApiMainService,
+        userDao: UserDao
     ): GetUser{
-        return GetUser(service)
+        return GetUser(service, userDao)
     }
 
     @Singleton
@@ -30,9 +31,8 @@ object UserModule {
     fun provideGetUsers(
         service: ApiMainService,
         userDao: UserDao,
-        appDataStoreManager: AppDataStore,
         ): GetUsers {
-        return GetUsers(service, userDao, appDataStoreManager)
+        return GetUsers(service, userDao)
     }
 
     @Singleton

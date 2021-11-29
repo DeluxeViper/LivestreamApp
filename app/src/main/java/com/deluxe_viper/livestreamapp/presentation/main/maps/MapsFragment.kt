@@ -14,16 +14,23 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
+import com.deluxe_viper.livestreamapp.business.domain.models.User
+import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
+import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling
 import com.deluxe_viper.livestreamapp.databinding.FragmentMapsBinding
 import com.deluxe_viper.livestreamapp.presentation.main.BaseMainFragment
+import com.deluxe_viper.livestreamapp.presentation.main.MainActivity
+import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
 import com.deluxe_viper.livestreamapp.presentation.util.processQueue
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MapsFragment : BaseMainFragment() {
@@ -36,6 +43,10 @@ class MapsFragment : BaseMainFragment() {
     private val binding get() = _binding!!
 
     private val mapsViewModel: MapsViewModel by viewModels()
+
+    @Inject
+    lateinit var sessionManager: SessionManager
+
 
     private val callback = OnMapReadyCallback { googleMap ->
 
@@ -94,7 +105,7 @@ class MapsFragment : BaseMainFragment() {
 //        observeSignout()
 //        observeUserLocationInfoList()
 //        observeUserLocationSaved()
-        populateMapWithUserLocations()
+        mapsViewModel.getUsers(true)
         subscribeObservers()
     }
 
@@ -103,22 +114,71 @@ class MapsFragment : BaseMainFragment() {
         mapsViewModel.subscribeToAllUserChanges()
         mapsViewModel.state.observe(viewLifecycleOwner) { state ->
             uiCommunicationListener.displayProgressBar(state.isLoading)
+            Log.d(TAG, "subscribeObservers: $state")
+            state.loggedInUsers?.let { listOfUsers ->
+                sessionManager.sessionState?.value?.user?.let { user ->
+                    populateMapWithUserLocations(listOfUsers, user.email)
+                }
+            }
             processQueue(
                 context = context,
                 queue = state.queue,
                 stateMessageCallback = object : StateMessageCallback {
+
                     override fun removeMessageFromStack() {
                         mapsViewModel.removeHeadFromQueue()
                     }
+
+                    override fun updateLocations(stateMessage: StateMessage) {
+                        Log.d(TAG, "updateLocations: stateMessage: $stateMessage")
+                    }
                 }
             )
-            // TODO: Set user locations
+
+//            // TODO: This doesn't work :( 
+            if (state.queue.peek()?.response?.message.equals(SuccessHandling.SUCCESS_UPDATED_USER_TASK)) {
+                Log.d(TAG, "UPDATE LOCATIONS YOU MOFO")
+                Log.d(TAG, "subscribeObservers: ${state.loggedInUsers}")
+            }
         }
     }
 
-    private fun populateMapWithUserLocations() {
+    private fun populateMapWithUserLocations(loggedInUsers : List<User>, currentUserEmail: String) {
         Log.d(TAG, "populateMapWithUserLocations: getting all logged in users")
-        mapsViewModel.getUsers(true)
+        map.clear()
+        shared = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+
+        loggedInUsers.forEach {
+            val latLng = LatLng(it.locationInfo.latitude, it.locationInfo.longitude)
+            if (it.email != currentUserEmail) {
+                // Not the logged in user
+                val markerColor =
+                    if (it.isStreaming) BitmapDescriptorFactory.defaultMarker(
+                        BitmapDescriptorFactory.HUE_AZURE
+                    ) else BitmapDescriptorFactory.defaultMarker(
+                        BitmapDescriptorFactory.HUE_RED
+                    )
+                val markerString =
+                    if (it.isStreaming) "${it.email} is currently STREAMING" else "${it.email ?: "Anonymous"} is currently here"
+                val markerTag = if (it.isStreaming) "STREAMING" else ""
+                map.addMarker(
+                    MarkerOptions().position(latLng)
+                        .title(markerString)
+                        .icon(markerColor)
+                )?.setTag(markerTag)
+            } else if (it.email == currentUserEmail) {
+                // Logged in user (move to marker)
+                map.addMarker(MarkerOptions().position(latLng).title("You are currently here"))
+                val update: CameraUpdate
+                if (shared.getBoolean("initialFetch", true)) {
+                    // Move camera with zoom if fragment is initially opened
+                    update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
+                    map.moveCamera(update)
+                }
+            }
+        }
+
+        shared.edit().putBoolean("InitialFetch", false).apply()
     }
 
 //    private fun observeUserLocationSaved() {

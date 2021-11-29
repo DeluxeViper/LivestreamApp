@@ -1,5 +1,6 @@
 package com.deluxe_viper.livestreamapp.business.interactors.auth
 
+import android.util.Log
 import com.deluxe_viper.livestreamapp.business.datasource.cache.user.UserDao
 import com.deluxe_viper.livestreamapp.business.datasource.cache.user.toEntity
 import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
@@ -24,7 +25,7 @@ class Login(
         email: String,
         password: String
     ): Flow<DataState<User>> = flow {
-        emit(DataState.loading<User>())
+        emit(DataState.loading())
 
         // Login
         val loginRequest = LoginRequest(email, password)

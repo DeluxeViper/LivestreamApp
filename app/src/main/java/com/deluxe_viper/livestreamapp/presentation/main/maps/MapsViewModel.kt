@@ -4,28 +4,30 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
-import com.deluxe_viper.livestreamapp.business.domain.util.UIComponentType
-import com.deluxe_viper.livestreamapp.business.domain.util.doesMessageAlreadyExistInQueue
+import com.deluxe_viper.livestreamapp.business.domain.models.User
+import com.deluxe_viper.livestreamapp.business.domain.util.*
+import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling.Companion.SUCCESS_UPDATED_USER_TASK
+import com.deluxe_viper.livestreamapp.business.interactors.user.GetUser
 import com.deluxe_viper.livestreamapp.business.interactors.user.GetUsers
 import com.deluxe_viper.livestreamapp.business.interactors.user.SubscribeToUsers
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.invoke
 import javax.inject.Inject
-import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 class MapsViewModel @Inject constructor(
     private val getUsers: GetUsers,
     private val subscribeToUsers: SubscribeToUsers,
+    private val getUser: GetUser,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -60,15 +62,15 @@ class MapsViewModel @Inject constructor(
     fun getUsers(forLoggedIn: Boolean) {
         state.value?.let { state ->
             if (forLoggedIn) {
-                sessionManager.sessionState.value?.user?.let {
-                    getUsers.executeForLoggedIn(it.authToken)
+                sessionManager.sessionState.value?.user?.let { user ->
+                    getUsers.executeForLoggedIn(user.authToken, user.email)
                         .onEach { dataState ->
 
                             this.state.value = state.copy(isLoading = dataState.isLoading)
 
-                            dataState.data?.let {
-                                this.state.value = state.copy(loggedInUsers = it)
-                                Log.d(TAG, "getUsers: $it")
+                            dataState.data?.let { userList ->
+                                this.state.value = state.copy(loggedInUsers = userList)
+                                Log.d(TAG, "getUsers: $userList")
                             }
 
                             dataState.stateMessage?.let { stateMessage ->
@@ -87,20 +89,90 @@ class MapsViewModel @Inject constructor(
         }
     }
 
+
+    private fun getAndCacheUser(email: String) {
+        Log.d(TAG, "getAndCacheUser: gettingAndCachingUser")
+        state.value?.let { state ->
+            sessionManager.sessionState.value?.user?.let {
+                getUser.execute(email, authToken = it.authToken)
+                    .onEach { dataState ->
+                        this.state.value = state.copy(isLoading = dataState.isLoading)
+                        dataState.data?.let { user ->
+                            this.state.value = state.copy(updatedUser = user)
+                            updateUserList()
+                            appendToMessageQueue(
+                                StateMessage(
+                                    response = Response(
+                                        message = SUCCESS_UPDATED_USER_TASK,
+                                        messageType = MessageType.Success(),
+                                        uiComponentType = UIComponentType.None()
+                                    )
+                                )
+                            )
+//                            return@onEach
+                        }
+                    }.launchIn(viewModelScope)
+            }
+        }
+    }
+
+    private fun updateUserList() {
+        Log.d(TAG, "updateUserList: updatingUserList")
+        state.value?.let { state ->
+            state.updatedUser?.let { updatedUser ->
+                state.loggedInUsers?.let { loggedInUsers ->
+                    val listOfUsers: MutableList<User> = mutableListOf<User>()
+                    listOfUsers.addAll(loggedInUsers)
+                    var contained = false
+                    listOfUsers.forEachIndexed { index, user ->
+                        Log.d(TAG, "updateUserList: forEachuser: $user")
+
+                        if (user.email == updatedUser.email) {
+                            Log.d(TAG, "updateUserList: updatedUser: $updatedUser\n\nuser: $user")
+                            if (!updatedUser.isLoggedIn) {
+                                listOfUsers.removeAt(index)
+                            } else {
+                                listOfUsers[index] = updatedUser
+                            }
+                            contained = true
+                        }
+                    }
+                    if (!contained && updatedUser.isLoggedIn) {
+                        listOfUsers.add(updatedUser)
+                    }
+                    this.state.value = state.copy(loggedInUsers = listOfUsers)
+                    Log.d(TAG, "newUserList: $listOfUsers")
+                }
+            }
+        }
+    }
+
     // Listen for changes within the user collection
     // If a change is found, retrieve user id and fetch the user changed,
     @ExperimentalCoroutinesApi
     fun subscribeToAllUserChanges() {
         state.value?.let { state ->
-            sessionManager.sessionState.value?.user?.let {
-                subscribeToUsers.execute(it.authToken)
-                    .onEach {
-                        Log.d(TAG, "subscribeToAllUserChanges: $it")
+            sessionManager.sessionState.value?.user?.let { user ->
+                subscribeToUsers.execute(user.authToken)
+                    .onEach { dataState ->
+                        Log.d(TAG, "subscribeToAllUserChanges: $dataState")
+                        dataState.data?.let {
+                            val changedData: JsonObject = JsonParser.parseString(it).asJsonObject
+//                            Log.d(TAG, "subscribeToAllUserChanges: changedData $changedData")
+                            if (changedData.isJsonObject && changedData.get("email") != null) {
+                                getAndCacheUser(
+                                    changedData.get("email").toString().replace("\"", " ").trim()
+                                )
+                                // Update user within list of users
+                            }
+                        }
+
+                        dataState.stateMessage?.let {
+                            appendToMessageQueue(it)
+                        }
                     }.launchIn(viewModelScope)
             }
         }
-
-
     }
 
     fun logout() {

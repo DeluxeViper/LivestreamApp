@@ -1,7 +1,6 @@
 package com.deluxe_viper.livestreamapp.di
 
 import android.app.Application
-import android.icu.util.TimeUnit
 import androidx.room.Room
 import com.deluxe_viper.livestreamapp.business.datasource.cache.AppDatabase
 import com.deluxe_viper.livestreamapp.business.datasource.cache.AppDatabase.Companion.DATABASE_NAME
@@ -17,17 +16,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttp
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.INFINITE
-import kotlin.time.times
-
-
 
 
 @Module
