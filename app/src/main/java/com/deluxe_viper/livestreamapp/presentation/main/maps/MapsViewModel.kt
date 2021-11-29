@@ -11,12 +11,15 @@ import com.deluxe_viper.livestreamapp.business.interactors.user.GetUsers
 import com.deluxe_viper.livestreamapp.business.interactors.user.SubscribeToUsers
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 class MapsViewModel @Inject constructor(
@@ -89,23 +92,19 @@ class MapsViewModel @Inject constructor(
         state.value?.let { state ->
             sessionManager.sessionState.value?.user?.let {
                 Log.d(TAG, "subscribeToAllUserChanges: executing")
-                subscribeToUsers.execute(it.authToken)
-//                    .map { dataState ->
-//                        this.state.value = state.copy(isLoading = dataState.isLoading)
-//
-//                        dataState.data?.let {
-//                            Log.d(TAG, "Datastate data received: $it")
-//                        }
-//
-//                        dataState.stateMessage?.let { stateMessage ->
-//                            Log.d(TAG, "State message received: $stateMessage")
-//                        }
-//                    }
-                    .onEach { dataState ->
-                        Log.d(TAG, "subscribeToAllUserChanges: dataState: $dataState")
-                    }
-                    .launchIn(viewModelScope)
 
+                viewModelScope.launch {
+                    subscribeToUsers.execute(it.authToken)
+                        .subscribe({
+                            Log.d(TAG, "subscribeToAllUserChanges: $it")
+                        },
+                            {
+                                Log.d(TAG, "subscribeToAllUserChanges: $it")
+                            },
+                            {
+                                Log.d(TAG, "subscribeToAllUserChanges: $it")
+                            })
+                }
 
             }
         }
