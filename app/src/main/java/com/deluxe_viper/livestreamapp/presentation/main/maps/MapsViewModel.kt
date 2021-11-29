@@ -12,6 +12,7 @@ import com.deluxe_viper.livestreamapp.business.interactors.user.SubscribeToUsers
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
@@ -88,33 +89,19 @@ class MapsViewModel @Inject constructor(
 
     // Listen for changes within the user collection
     // If a change is found, retrieve user id and fetch the user changed,
+    @ExperimentalCoroutinesApi
     fun subscribeToAllUserChanges() {
         state.value?.let { state ->
             sessionManager.sessionState.value?.user?.let {
-                Log.d(TAG, "subscribeToAllUserChanges: executing")
-
-                viewModelScope.launch {
-                    subscribeToUsers.execute(it.authToken)
-                        .subscribe({
-                            Log.d(TAG, "subscribeToAllUserChanges: $it")
-                        },
-                            {
-                                Log.d(TAG, "subscribeToAllUserChanges: $it")
-                            },
-                            {
-                                Log.d(TAG, "subscribeToAllUserChanges: $it")
-                            })
-                }
-
+                subscribeToUsers.execute(it.authToken)
+                    .onEach {
+                        Log.d(TAG, "subscribeToAllUserChanges: $it")
+                    }.launchIn(viewModelScope)
             }
         }
 
 
     }
-
-//    fun subscribeToAllLoggedInUserChanges() {
-//
-//    }
 
     fun logout() {
         sessionManager.logout()

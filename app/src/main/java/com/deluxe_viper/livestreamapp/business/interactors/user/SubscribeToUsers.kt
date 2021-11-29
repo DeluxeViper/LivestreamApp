@@ -1,5 +1,6 @@
 package com.deluxe_viper.livestreamapp.business.interactors.user
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.ApiMainService
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.handleUseCaseException
@@ -10,7 +11,11 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.*
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.Response
 import okhttp3.ResponseBody
 import okio.BufferedSource
@@ -28,11 +33,37 @@ import kotlin.time.Duration
 class SubscribeToUsers(
     private val service: ApiMainService
 ) {
+    @SuppressLint("CheckResult")
+    @ExperimentalCoroutinesApi
+    fun execute(authToken: String?) = callbackFlow<DataState<String>> {
+        trySend(DataState.loading())
 
-    fun execute(authToken: String?): Observable<String> = service.subscribeToUsers("Bearer $authToken")
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .flatMap { responseBody -> events(responseBody.source()) }
+        val observable = service.subscribeToUsers("Bearer $authToken")
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .flatMap { responseBody ->
+                events(responseBody.source())
+            }
+
+        observable.subscribe(
+            {
+                trySendBlocking(DataState.data(response = null, data = it))
+            },
+            {
+                trySendBlocking(DataState.data(response = null, data = it.message))
+            }
+        )
+
+        awaitClose {
+            observable.unsubscribeOn(Schedulers.io())
+                .toMap {
+                    Log.d(TAG, "execute: $it")
+                }
+        }
+    }.catch { e ->
+        emit(handleUseCaseException(e))
+    }
+
 
     private fun events(source: BufferedSource): Observable<String> {
         return Observable.create { emitter ->
