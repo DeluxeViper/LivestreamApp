@@ -51,9 +51,10 @@ class AppModule {
             .readTimeout(1, java.util.concurrent.TimeUnit.DAYS)
             .build()
     }
+
     @Singleton
     @Provides
-    fun provideRetrofitBuilder(gsonBuilder: Gson): Retrofit.Builder{
+    fun provideRetrofitBuilder(gsonBuilder: Gson): Retrofit.Builder {
         return Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .client(provideOkhttpClientBuilder())
@@ -67,7 +68,6 @@ class AppModule {
         return retrofitBuilder
             .build()
             .create(ApiMainService::class.java)
-
     }
 
     // Local database provisions

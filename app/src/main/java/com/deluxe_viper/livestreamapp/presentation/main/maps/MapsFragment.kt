@@ -1,9 +1,11 @@
 package com.deluxe_viper.livestreamapp.presentation.main.maps
 
 import android.Manifest
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.location.LocationListener
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,15 +16,16 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
+import com.deluxe_viper.livestreamapp.business.domain.models.LocationInfo
 import com.deluxe_viper.livestreamapp.business.domain.models.User
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
 import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling
 import com.deluxe_viper.livestreamapp.databinding.FragmentMapsBinding
 import com.deluxe_viper.livestreamapp.presentation.main.BaseMainFragment
-import com.deluxe_viper.livestreamapp.presentation.main.MainActivity
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
 import com.deluxe_viper.livestreamapp.presentation.util.processQueue
+import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
@@ -30,8 +33,13 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
+// TODO: Update currentuser location when location changes
+// TODO: If location is -200, might wanna display an error
+
+// TODO: setup on marker click
 @AndroidEntryPoint
 class MapsFragment : BaseMainFragment() {
 
@@ -57,8 +65,17 @@ class MapsFragment : BaseMainFragment() {
             true
         }
         map = googleMap
-//        getCurrentLocation()
 
+//        map.setIndoorEnabled(true)
+//        map.setOnMyLocationClickListener { location ->
+//            Log.d(TAG, "locationChanged: $location")
+//            sessionManager.sessionState.value?.user?.let {
+//                val locationInfo = LocationInfo(user_id = it.id, latitude = location.latitude, longitude = location.longitude)
+//                updateUserLocation(it, locationInfo)
+//            }
+//        }
+
+        getCurrentLocation()
 //        map.setOnMarkerClickListener {
 //            if (it.tag.toString() === "STREAMING") {
 //
@@ -109,12 +126,11 @@ class MapsFragment : BaseMainFragment() {
         subscribeObservers()
     }
 
+    @ExperimentalCoroutinesApi
     private fun subscribeObservers() {
-        Log.d(TAG, "subscribeObservers: subscribing observers")
         mapsViewModel.subscribeToAllUserChanges()
         mapsViewModel.state.observe(viewLifecycleOwner) { state ->
             uiCommunicationListener.displayProgressBar(state.isLoading)
-            Log.d(TAG, "subscribeObservers: $state")
             state.loggedInUsers?.let { listOfUsers ->
                 sessionManager.sessionState?.value?.user?.let { user ->
                     populateMapWithUserLocations(listOfUsers, user.email)
@@ -130,12 +146,11 @@ class MapsFragment : BaseMainFragment() {
                     }
 
                     override fun updateLocations(stateMessage: StateMessage) {
-                        Log.d(TAG, "updateLocations: stateMessage: $stateMessage")
                     }
                 }
             )
 
-//            // TODO: This doesn't work :( 
+//            // TODO: This doesn't work :(
             if (state.queue.peek()?.response?.message.equals(SuccessHandling.SUCCESS_UPDATED_USER_TASK)) {
                 Log.d(TAG, "UPDATE LOCATIONS YOU MOFO")
                 Log.d(TAG, "subscribeObservers: ${state.loggedInUsers}")
@@ -301,16 +316,35 @@ class MapsFragment : BaseMainFragment() {
         ) {
             requestLocPermissions()
         } else {
-            fusedLocClient.lastLocation.addOnCompleteListener {
-                val location = it.result
-                if (location != null) {
-//                    val locationInfo = LocationInfo(location.latitude, location.longitude);
-//                    val currentUser = (activity as MainActivity).getCurrentUser();
-//                    userViewModel.saveUserLocation(currentUser!!.uid, currentUser.email.toString(), locationInfo)
-                } else {
-                    Log.e(TAG, "No location found")
+            fusedLocClient.lastLocation.addOnCompleteListener { taskLocation ->
+                taskLocation.result?.let { location ->
+                    sessionManager.sessionState.value?.user?.let {
+                        val locationInfo = LocationInfo(user_id = it.id, latitude = location.latitude, longitude = location.longitude)
+                        updateUserLocation(it, locationInfo)
+                    }
                 }
+//                if (location != null) {
+////                    val locationInfo = LocationInfo(location.latitude, location.longitude);
+////                    val currentUser = (activity as MainActivity).getCurrentUser();
+////                    userViewModel.saveUserLocation(currentUser!!.uid, currentUser.email.toString(), locationInfo)
+//                } else {
+//                    Log.e(TAG, "No location found")
+//                }
             }
+        }
+    }
+
+    private fun updateUserLocation(userToUpdate: User, locationInfo: LocationInfo) {
+        val updatedUser = userToUpdate.copy(
+            id = userToUpdate.id,
+            email = userToUpdate.email,
+            locationInfo = locationInfo,
+            authToken = userToUpdate.authToken,
+            isStreaming = userToUpdate.isStreaming,
+            isLoggedIn = userToUpdate.isLoggedIn
+        )
+        updatedUser.let { user ->
+            mapsViewModel.updateUser(user, authToken = user.authToken, true)
         }
     }
 

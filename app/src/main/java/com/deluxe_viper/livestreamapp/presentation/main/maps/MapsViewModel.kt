@@ -10,6 +10,7 @@ import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling.Compa
 import com.deluxe_viper.livestreamapp.business.interactors.user.GetUser
 import com.deluxe_viper.livestreamapp.business.interactors.user.GetUsers
 import com.deluxe_viper.livestreamapp.business.interactors.user.SubscribeToUsers
+import com.deluxe_viper.livestreamapp.business.interactors.user.UpdateUser
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -28,6 +29,7 @@ class MapsViewModel @Inject constructor(
     private val getUsers: GetUsers,
     private val subscribeToUsers: SubscribeToUsers,
     private val getUser: GetUser,
+    private val updateUser: UpdateUser,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -89,9 +91,20 @@ class MapsViewModel @Inject constructor(
         }
     }
 
+    fun updateUser(userToUpdate: User, authToken: String?, currentUser: Boolean) {
+        state.value?.let { state ->
+            updateUser.execute(user = userToUpdate, authToken = authToken, currentUser = currentUser).onEach { dataState ->
+                this.state.value = state.copy(isLoading = dataState.isLoading)
+
+                dataState.data?.let {
+                    this.state.value = state.copy(updatedUser = it)
+                }
+            }.launchIn(viewModelScope)
+        }
+    }
+
 
     private fun getAndCacheUser(email: String) {
-        Log.d(TAG, "getAndCacheUser: gettingAndCachingUser")
         state.value?.let { state ->
             sessionManager.sessionState.value?.user?.let {
                 getUser.execute(email, authToken = it.authToken)
@@ -109,7 +122,6 @@ class MapsViewModel @Inject constructor(
                                     )
                                 )
                             )
-//                            return@onEach
                         }
                     }.launchIn(viewModelScope)
             }
@@ -117,7 +129,6 @@ class MapsViewModel @Inject constructor(
     }
 
     private fun updateUserList() {
-        Log.d(TAG, "updateUserList: updatingUserList")
         state.value?.let { state ->
             state.updatedUser?.let { updatedUser ->
                 state.loggedInUsers?.let { loggedInUsers ->
@@ -125,10 +136,8 @@ class MapsViewModel @Inject constructor(
                     listOfUsers.addAll(loggedInUsers)
                     var contained = false
                     listOfUsers.forEachIndexed { index, user ->
-                        Log.d(TAG, "updateUserList: forEachuser: $user")
 
                         if (user.email == updatedUser.email) {
-                            Log.d(TAG, "updateUserList: updatedUser: $updatedUser\n\nuser: $user")
                             if (!updatedUser.isLoggedIn) {
                                 listOfUsers.removeAt(index)
                             } else {
@@ -141,7 +150,6 @@ class MapsViewModel @Inject constructor(
                         listOfUsers.add(updatedUser)
                     }
                     this.state.value = state.copy(loggedInUsers = listOfUsers)
-                    Log.d(TAG, "newUserList: $listOfUsers")
                 }
             }
         }

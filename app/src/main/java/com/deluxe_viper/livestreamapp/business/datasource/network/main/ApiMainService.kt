@@ -32,7 +32,7 @@ interface ApiMainService {
         @Header("Authorization") jwtToken: String
     ) : Observable<ResponseBody>
 
-    @PUT("/{userId}")
+    @PUT("/api/users/user")
     suspend fun updateUser(
         @Header("Authorization") jwtToken: String,
         @Body user: User

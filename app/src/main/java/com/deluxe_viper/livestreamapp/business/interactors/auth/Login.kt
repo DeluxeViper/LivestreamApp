@@ -40,7 +40,7 @@ class Login(
         val currUser = User(
             id = loginResponse.userId,
             email = loginResponse.email,
-            authToken =  loginResponse.token,
+            authToken = loginResponse.token,
             locationInfo = LocationInfo(loginResponse.userId, -200.0, -200.0),
             isLoggedIn = true,
             isStreaming = false,
