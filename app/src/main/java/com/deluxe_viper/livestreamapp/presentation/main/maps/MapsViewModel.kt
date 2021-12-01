@@ -93,7 +93,11 @@ class MapsViewModel @Inject constructor(
 
     fun updateUser(userToUpdate: User, authToken: String?, currentUser: Boolean) {
         state.value?.let { state ->
-            updateUser.execute(user = userToUpdate, authToken = authToken, currentUser = currentUser).onEach { dataState ->
+            updateUser.execute(
+                user = userToUpdate,
+                authToken = authToken,
+                currentUser = currentUser
+            ).onEach { dataState ->
                 this.state.value = state.copy(isLoading = dataState.isLoading)
 
                 dataState.data?.let {
@@ -165,13 +169,21 @@ class MapsViewModel @Inject constructor(
                     .onEach { dataState ->
                         Log.d(TAG, "subscribeToAllUserChanges: $dataState")
                         dataState.data?.let {
-                            val changedData: JsonObject = JsonParser.parseString(it).asJsonObject
+                            try {
+                                val changedData: JsonObject =
+                                    JsonParser.parseString(it).asJsonObject
 //                            Log.d(TAG, "subscribeToAllUserChanges: changedData $changedData")
-                            if (changedData.isJsonObject && changedData.get("email") != null) {
-                                getAndCacheUser(
-                                    changedData.get("email").toString().replace("\"", " ").trim()
-                                )
-                                // Update user within list of users
+                                if (changedData.isJsonObject && changedData.get("email") != null) {
+                                    getAndCacheUser(
+                                        changedData.get("email").toString().replace("\"", " ")
+                                            .trim()
+                                    )
+                                    // Update user within list of users
+                                } else {
+
+                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "subscribeToAllUserChanges: $e", e)
                             }
                         }
 
