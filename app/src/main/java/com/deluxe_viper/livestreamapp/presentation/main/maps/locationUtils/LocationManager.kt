@@ -17,7 +17,11 @@ import javax.inject.Singleton
 private const val TAG = "LocationManager"
 
 @Singleton
-class LocationManager @Inject constructor(private val context: Context) {
+class LocationManager
+@Inject constructor(private val context: Context
+//, private val currentUserEmail: String, private val authToken: String
+)
+{
 
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -36,6 +40,8 @@ class LocationManager @Inject constructor(private val context: Context) {
     private val locationUpdatePendingIntent: PendingIntent by lazy {
         val intent = Intent(context, LocationUpdatesBroadcastReceiver::class.java)
         intent.action = LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES
+//        intent.putExtra(CURRENT_USER_EMAIL_EXTRA, currentUserEmail)
+//        intent.putExtra(CURRENT_AUTH_TOKEN, authToken)
         PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
@@ -80,5 +86,8 @@ class LocationManager @Inject constructor(private val context: Context) {
                 INSTANCE ?: LocationManager(context).also { INSTANCE = it }
             }
         }
+
+        const val CURRENT_USER_EMAIL_EXTRA = "currentUserEmail"
+        const val CURRENT_AUTH_TOKEN = "authToken"
     }
 }

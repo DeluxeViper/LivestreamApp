@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.business.domain.models.LocationInfo
 import com.deluxe_viper.livestreamapp.business.domain.models.User
+import com.deluxe_viper.livestreamapp.business.domain.util.ErrorHandling
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
 import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling
@@ -50,7 +51,8 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
     OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-//    private lateinit var fusedLocClient: FusedLocationProviderClient
+
+    //    private lateinit var fusedLocClient: FusedLocationProviderClient
     private lateinit var shared: SharedPreferences
 
     private var _binding: FragmentMapsBinding? = null
@@ -103,8 +105,17 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
-        locationManager = LocationManager(requireContext())
-        locationManager.startLocationUpdates()
+        sessionManager.sessionState.value?.user?.let { user ->
+
+            if (user.authToken == null) {
+                throw Exception(ErrorHandling.ERROR_AUTH_TOKEN_INVALID)
+            }
+
+            locationManager = LocationManager(requireContext())
+//            locationManager = LocationManager(requireContext(), user.email, user.authToken)
+            locationManager.startLocationUpdates()
+        }
+
 //        fetchUserLocationsFromFirebase()
 //
 //        observeSignout()
@@ -340,7 +351,12 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         grantResults: IntArray
     ) {
         if (requestCode == REQUEST_LOCATION) {
-            if (PermissionUtils.isPermissionGranted(permissions, grantResults, ACCESS_FINE_LOCATION)) {
+            if (PermissionUtils.isPermissionGranted(
+                    permissions,
+                    grantResults,
+                    ACCESS_FINE_LOCATION
+                )
+            ) {
                 // Enable the my location layer if the permission has been granted.
                 enableMyLocation()
             } else {
@@ -359,7 +375,8 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
     }
 
     override fun onMyLocationClick(location: Location) {
-        Toast.makeText(requireContext(), "Current location:\n" + location, Toast.LENGTH_LONG).show();
+        Toast.makeText(requireContext(), "Current location:\n" + location, Toast.LENGTH_LONG)
+            .show();
     }
 
     /**
@@ -393,7 +410,11 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
 
     private fun requestLocPermissions() {
         ActivityCompat.requestPermissions(
-            requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+            requireActivity(),
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ),
             REQUEST_LOCATION
         )
     }
