@@ -1,9 +1,9 @@
 package com.deluxe_viper.livestreamapp.presentation.main.maps
 
+import android.app.Application
+import android.location.Location
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.deluxe_viper.livestreamapp.business.domain.models.User
 import com.deluxe_viper.livestreamapp.business.domain.util.*
 import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling.Companion.SUCCESS_UPDATED_USER_TASK
@@ -23,19 +23,29 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.invoke
 import javax.inject.Inject
+import com.deluxe_viper.livestreamapp.business.domain.models.LocationInfo
+import com.deluxe_viper.livestreamapp.presentation.main.maps.locationUtils.LocationManager
+import dagger.hilt.android.qualifiers.ApplicationContext
+
 
 @HiltViewModel
-class MapsViewModel @Inject constructor(
+open class MapsViewModel @Inject constructor(
     private val getUsers: GetUsers,
     private val subscribeToUsers: SubscribeToUsers,
     private val getUser: GetUser,
     private val updateUser: UpdateUser,
-    private val sessionManager: SessionManager
-) : ViewModel() {
+    private val sessionManager: SessionManager,
+    application: Application
+) : AndroidViewModel(application) {
+
+    protected val context
+        get() = getApplication<Application>()
 
     private val TAG: String = "MapsViewModel"
 
     val state: MutableLiveData<MapState> = MutableLiveData(MapState())
+    private val mLocationData: MediatorLiveData<LocationInfo> = MediatorLiveData<LocationInfo>()
+    private lateinit var locationManager: LocationManager
 
     fun removeHeadFromQueue() {
         state.value?.let { state ->
@@ -193,6 +203,34 @@ class MapsViewModel @Inject constructor(
                     }.launchIn(viewModelScope)
             }
         }
+    }
+
+    fun addLocationReceiver(locationData: LiveData<Location>) {
+        sessionManager.sessionState.value?.user?.let { currentUser ->
+            mLocationData.addSource(locationData) { newLocationData ->
+                val newLocation = LocationInfo(
+                    user_id = currentUser.id,
+                    latitude = newLocationData.latitude,
+                    longitude = newLocationData.longitude
+                )
+                val updatedUser = currentUser.copy(
+                    id = currentUser.id,
+                    email = currentUser.email,
+                    locationInfo = newLocation,
+                    authToken = currentUser.authToken,
+                    isStreaming = currentUser.isStreaming,
+                    isLoggedIn = currentUser.isLoggedIn
+                )
+                updateUser.execute(updatedUser, currentUser.authToken, true)
+                    .launchIn(viewModelScope)
+            }
+            locationManager.startLocationUpdates()
+        }
+    }
+
+    fun removeLocationReceiver(locationData: LiveData<Location>) {
+        locationManager.stopLocationUpdates()
+        mLocationData.removeSource(locationData)
     }
 
     fun logout() {

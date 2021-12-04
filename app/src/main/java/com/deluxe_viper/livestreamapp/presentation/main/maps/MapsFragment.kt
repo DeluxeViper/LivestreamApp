@@ -111,9 +111,10 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
                 throw Exception(ErrorHandling.ERROR_AUTH_TOKEN_INVALID)
             }
 
-            locationManager = LocationManager(requireContext())
-//            locationManager = LocationManager(requireContext(), user.email, user.authToken)
-            locationManager.startLocationUpdates()
+//            locationManager = LocationManager(requireContext())
+////            locationManager = LocationManager(requireContext(), user.email, user.authToken)
+//            locationManager.startLocationUpdates()
+
         }
 
 //        fetchUserLocationsFromFirebase()

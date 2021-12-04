@@ -17,6 +17,12 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
+import androidx.lifecycle.LiveData
+
+import androidx.lifecycle.MutableLiveData
+
+
+
 
 private const val TAG = "LUBroadcastReceiver"
 
@@ -29,6 +35,12 @@ class LocationUpdatesBroadcastReceiver :
 //
 //    @Inject
 //    lateinit var updateUser: UpdateUser
+
+    private val mData: MutableLiveData<Location> = MutableLiveData<Location>()
+
+    fun getData(): LiveData<Location>? {
+        return mData
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(TAG, "onReceive() context:$context, intent:$intent")
@@ -43,6 +55,7 @@ class LocationUpdatesBroadcastReceiver :
             }
 
             LocationResult.extractResult(intent)?.let { locationResult ->
+                mData.value = locationResult.lastLocation
 
                 Log.d(TAG, "onReceive: LocationResult: ${locationResult.lastLocation}")
 

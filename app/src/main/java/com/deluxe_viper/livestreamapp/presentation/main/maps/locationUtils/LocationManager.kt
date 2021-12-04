@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.annotation.MainThread
 import com.deluxe_viper.livestreamapp.presentation.util.PermissionUtils.hasPermission
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import java.util.concurrent.TimeUnit
@@ -18,10 +19,10 @@ private const val TAG = "LocationManager"
 
 @Singleton
 class LocationManager
-@Inject constructor(private val context: Context
+@Inject constructor(
+    private val context: Context
 //, private val currentUserEmail: String, private val authToken: String
-)
-{
+) {
 
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -37,13 +38,14 @@ class LocationManager
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-    private val locationUpdatePendingIntent: PendingIntent by lazy {
-        val intent = Intent(context, LocationUpdatesBroadcastReceiver::class.java)
-        intent.action = LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES
-//        intent.putExtra(CURRENT_USER_EMAIL_EXTRA, currentUserEmail)
-//        intent.putExtra(CURRENT_AUTH_TOKEN, authToken)
-        PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
+//    private val locationUpdatePendingIntent: PendingIntent by lazy {
+//        val intent = Intent(context, LocationUpdatesBroadcastReceiver::class.java)
+//        intent.action = LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES
+////        IntentFil
+////        intent.putExtra(CURRENT_USER_EMAIL_EXTRA, currentUserEmail)
+////        intent.putExtra(CURRENT_AUTH_TOKEN, authToken)
+//        PendingIntent.getBroadcast(0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+//    }
 
     /**
      * Uses the FusedLocationProvider to start location updates if the correct fine locations are
@@ -62,7 +64,7 @@ class LocationManager
         try {
             // If the PendingIntent is the same as the last request (which it always is), this
             // request will replace any requestLocationUpdates() called before.
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationUpdatePendingIntent)
+//            fusedLocationClient.requestLocationUpdates(locationRequest, locationUpdatePendingIntent)
         } catch (permissionRevoked: SecurityException) {
             // Exception only occurs if the user revokes the FINE location permission before
             // requestLocationUpdates() is finished executing (very rare).
@@ -74,7 +76,7 @@ class LocationManager
     @MainThread
     fun stopLocationUpdates() {
         Log.d(TAG, "stopLocationUpdates()")
-        fusedLocationClient.removeLocationUpdates(locationUpdatePendingIntent)
+//        fusedLocationClient.removeLocationUpdates(locationUpdatePendingIntent)
     }
 
     companion object {

@@ -94,10 +94,9 @@ class AppModule {
         return db.getLocationDao()
     }
 
-//    @Singleton
-//    @Provides
-//    fun provideLocationManager(context: Context): LocationManager {
-//        return LocationManager.getInstance(context)
-//    }
-
+    @Singleton
+    @Provides
+    fun provideLocationManager(context: Context): LocationManager {
+        return LocationManager.getInstance(context)
+    }
 }
