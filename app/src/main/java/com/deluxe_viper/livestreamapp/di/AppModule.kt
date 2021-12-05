@@ -1,7 +1,6 @@
 package com.deluxe_viper.livestreamapp.di
 
 import android.app.Application
-import android.content.Context
 import androidx.room.Room
 import com.deluxe_viper.livestreamapp.business.datasource.cache.AppDatabase
 import com.deluxe_viper.livestreamapp.business.datasource.cache.AppDatabase.Companion.DATABASE_NAME
@@ -11,7 +10,6 @@ import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
 import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStoreManager
 import com.deluxe_viper.livestreamapp.business.datasource.network.main.ApiMainService
 import com.deluxe_viper.livestreamapp.business.domain.util.Constants
-import com.deluxe_viper.livestreamapp.presentation.main.maps.locationUtils.LocationManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -92,11 +90,5 @@ class AppModule {
     @Provides
     fun provideLocationDao(db: AppDatabase): LocationDao {
         return db.getLocationDao()
-    }
-
-    @Singleton
-    @Provides
-    fun provideLocationManager(context: Context): LocationManager {
-        return LocationManager.getInstance(context)
     }
 }

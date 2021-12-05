@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
@@ -25,12 +26,9 @@ import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
 import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling
 import com.deluxe_viper.livestreamapp.databinding.FragmentMapsBinding
 import com.deluxe_viper.livestreamapp.presentation.main.BaseMainFragment
-import com.deluxe_viper.livestreamapp.presentation.main.maps.locationUtils.LocationManager
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
 import com.deluxe_viper.livestreamapp.presentation.util.PermissionUtils
 import com.deluxe_viper.livestreamapp.presentation.util.processQueue
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -52,7 +50,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
 
     private lateinit var map: GoogleMap
 
-    //    private lateinit var fusedLocClient: FusedLocationProviderClient
     private lateinit var shared: SharedPreferences
 
     private var _binding: FragmentMapsBinding? = null
@@ -60,16 +57,8 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
 
     private val mapsViewModel: MapsViewModel by viewModels()
 
-    /**
-     * Flag indicating whether a requested permission has been denied after returning in
-     * [.onRequestPermissionsResult].
-     */
-    private var permissionDenied = false
-
     @Inject
     lateinit var sessionManager: SessionManager
-
-    lateinit var locationManager: LocationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,7 +90,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        setupLocClient()
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
@@ -110,13 +98,7 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
             if (user.authToken == null) {
                 throw Exception(ErrorHandling.ERROR_AUTH_TOKEN_INVALID)
             }
-
-//            locationManager = LocationManager(requireContext())
-////            locationManager = LocationManager(requireContext(), user.email, user.authToken)
-//            locationManager.startLocationUpdates()
-
         }
-
 //        fetchUserLocationsFromFirebase()
 //
 //        observeSignout()
@@ -126,9 +108,55 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         subscribeObservers()
     }
 
+    private fun prepRequestLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            requestLocationUpdates()
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                REQUEST_LOCATION
+            )
+        }
+    }
+
+    private fun requestLocationUpdates() {
+        mapsViewModel.getLocationLiveData().observe(viewLifecycleOwner, { location ->
+            sessionManager.sessionState.value?.user?.let { currentUser ->
+                val newLocation = LocationInfo(
+                    user_id = currentUser.id,
+                    latitude = location.latitude,
+                    longitude = location.longitude
+                )
+                Log.d(TAG, "requestLocationUpdates: $location")
+                val updatedUser = currentUser.copy(
+                    id = currentUser.id,
+                    email = currentUser.email,
+                    locationInfo = newLocation,
+                    authToken = currentUser.authToken,
+                    isStreaming = currentUser.isStreaming,
+                    isLoggedIn = currentUser.isLoggedIn
+                )
+                mapsViewModel.updateUser(
+                    userToUpdate = updatedUser,
+                    authToken = currentUser.authToken,
+                    currentUser = true
+                )
+            }
+        })
+    }
+
     @ExperimentalCoroutinesApi
     private fun subscribeObservers() {
         mapsViewModel.subscribeToAllUserChanges()
+        prepRequestLocationUpdates()
         mapsViewModel.state.observe(viewLifecycleOwner) { state ->
             uiCommunicationListener.displayProgressBar(state.isLoading)
             state.loggedInUsers?.let { listOfUsers ->
@@ -149,12 +177,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
                     }
                 }
             )
-
-//            // TODO: This doesn't work :(
-            if (state.queue.peek()?.response?.message.equals(SuccessHandling.SUCCESS_UPDATED_USER_TASK)) {
-                Log.d(TAG, "UPDATE LOCATIONS YOU MOFO")
-                Log.d(TAG, "subscribeObservers: ${state.loggedInUsers}")
-            }
         }
     }
 
@@ -180,7 +202,7 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
                     MarkerOptions().position(latLng)
                         .title(markerString)
                         .icon(markerColor)
-                )?.setTag(markerTag)
+                )?.tag = markerTag
             } else if (it.email == currentUserEmail) {
                 // Logged in user (move to marker)
                 map.addMarker(MarkerOptions().position(latLng).title("You are currently here"))
@@ -296,56 +318,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
 //        shared.edit().putBoolean("InitialFetch", false).apply()
 //    }
 
-//    private fun setupLocClient() {
-//        fusedLocClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-//    }
-
-    private fun getCurrentLocation() {
-        Log.d(TAG, "getCurrentLocation: getting current location");
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestLocPermissions()
-        } else {
-
-//            fusedLocClient.lastLocation.addOnCompleteListener { taskLocation ->
-//                taskLocation.result?.let { location ->
-//                    sessionManager.sessionState.value?.user?.let {
-//                        val locationInfo = LocationInfo(
-//                            user_id = it.id,
-//                            latitude = location.latitude,
-//                            longitude = location.longitude
-//                        )
-//                        updateUserLocation(it, locationInfo)
-//                    }
-//                }
-//                if (location != null) {
-////                    val locationInfo = LocationInfo(location.latitude, location.longitude);
-////                    val currentUser = (activity as MainActivity).getCurrentUser();
-////                    userViewModel.saveUserLocation(currentUser!!.uid, currentUser.email.toString(), locationInfo)
-//                } else {
-//                    Log.e(TAG, "No location found")
-//                }
-
-        }
-    }
-
-    private fun updateUserLocation(userToUpdate: User, locationInfo: LocationInfo) {
-        val updatedUser = userToUpdate.copy(
-            id = userToUpdate.id,
-            email = userToUpdate.email,
-            locationInfo = locationInfo,
-            authToken = userToUpdate.authToken,
-            isStreaming = userToUpdate.isStreaming,
-            isLoggedIn = userToUpdate.isLoggedIn
-        )
-        updatedUser.let { user ->
-            mapsViewModel.updateUser(user, authToken = user.authToken, true)
-        }
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -359,13 +331,9 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
                 )
             ) {
                 // Enable the my location layer if the permission has been granted.
-                enableMyLocation()
+                requestLocationUpdates()
             } else {
                 // Permission was denied. Display an error message
-                // [START_EXCLUDE]
-                // Display the missing permission error dialog when the fragments resume.
-                permissionDenied = true
-                // [END_EXCLUDE]
             }
         }
     }
@@ -388,36 +356,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         map.setOnMyLocationButtonClickListener(this)
         map.setOnMyLocationClickListener(this)
         map.setOnMarkerClickListener(this)
-        enableMyLocation()
-    }
-
-    private fun enableMyLocation() {
-        if (!::map.isInitialized) return
-        // [START maps_check_location_permission]
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            if (map != null) {
-                map.isMyLocationEnabled = true;
-            }
-        } else {
-            // Permission to access location is missing
-            requestLocPermissions()
-        }
-        // [END maps_check_location_permission]
-    }
-
-    private fun requestLocPermissions() {
-        ActivityCompat.requestPermissions(
-            requireActivity(),
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ),
-            REQUEST_LOCATION
-        )
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
@@ -427,21 +365,10 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         return true
     }
 
-    override fun onPause() {
-        super.onPause()
-
-        locationManager.stopLocationUpdates()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        locationManager.startLocationUpdates()
-    }
-
     companion object {
         private const val REQUEST_LOCATION =
             1 // request code to identify specific permission request
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 2000
         private const val TAG = "MapsFragment"
     }
 }

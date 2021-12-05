@@ -13,7 +13,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import java.util.concurrent.TimeUnit
 
-class LocationLiveData(context: Context) : LiveData<LocationInfo>() {
+class LocationLiveData(context: Context) : LiveData<Location>() {
 
     private val mContext: Context = context
     private var fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -40,11 +40,7 @@ class LocationLiveData(context: Context) : LiveData<LocationInfo>() {
 
     fun setLocationData(location: Location) {
         if (location != null) {
-            value = LocationInfo(
-                // TODO: Fix this
-                null, latitude = location.latitude,
-                longitude = location.longitude
-            )
+            value = location
         }
     }
 
