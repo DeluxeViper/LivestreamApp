@@ -2,8 +2,6 @@ package com.deluxe_viper.livestreamapp.presentation.main.maps
 
 import android.Manifest
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -18,15 +16,16 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
+import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
 import com.deluxe_viper.livestreamapp.business.domain.models.LocationInfo
 import com.deluxe_viper.livestreamapp.business.domain.models.User
 import com.deluxe_viper.livestreamapp.business.domain.util.ErrorHandling
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
-import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling
 import com.deluxe_viper.livestreamapp.databinding.FragmentMapsBinding
 import com.deluxe_viper.livestreamapp.presentation.main.BaseMainFragment
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
+import com.deluxe_viper.livestreamapp.presentation.util.DataStoreKeys
 import com.deluxe_viper.livestreamapp.presentation.util.PermissionUtils
 import com.deluxe_viper.livestreamapp.presentation.util.processQueue
 import com.google.android.gms.maps.*
@@ -36,9 +35,9 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
-// TODO: Update currentuser location when location changes
 // TODO: If location is -200, might wanna display an error
 
 // TODO: setup on marker click
@@ -50,8 +49,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
 
     private lateinit var map: GoogleMap
 
-    private lateinit var shared: SharedPreferences
-
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
 
@@ -59,6 +56,9 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
 
     @Inject
     lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var dataStoreManager: AppDataStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,11 +71,10 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
             }
         requireActivity().onBackPressedDispatcher.addCallback(this, callback);
 
-        shared = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-        with(shared.edit()) {
-            putBoolean("initialFetch", true)
-            apply()
-        }
+        // Initialize initial fetch location value to true --> in order to fetch and zoom into the logged in
+        //      user's current location
+        runBlocking { dataStoreManager.setValue(DataStoreKeys.INITIAL_FETCH_LOCATION, "true") }
+
     }
 
     override fun onCreateView(
@@ -99,11 +98,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
                 throw Exception(ErrorHandling.ERROR_AUTH_TOKEN_INVALID)
             }
         }
-//        fetchUserLocationsFromFirebase()
-//
-//        observeSignout()
-//        observeUserLocationInfoList()
-//        observeUserLocationSaved()
         mapsViewModel.getUsers(true)
         subscribeObservers()
     }
@@ -160,8 +154,8 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         mapsViewModel.state.observe(viewLifecycleOwner) { state ->
             uiCommunicationListener.displayProgressBar(state.isLoading)
             state.loggedInUsers?.let { listOfUsers ->
-                sessionManager.sessionState?.value?.user?.let { user ->
-                    populateMapWithUserLocations(listOfUsers, user.email)
+                sessionManager.sessionState.value?.user?.let { currentUser ->
+                    populateMapWithUserLocations(listOfUsers, currentUser.email)
                 }
             }
             processQueue(
@@ -183,7 +177,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
     private fun populateMapWithUserLocations(loggedInUsers: List<User>, currentUserEmail: String) {
         Log.d(TAG, "populateMapWithUserLocations: getting all logged in users")
         map.clear()
-        shared = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
 
         loggedInUsers.forEach {
             val latLng = LatLng(it.locationInfo.latitude, it.locationInfo.longitude)
@@ -207,15 +200,15 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
                 // Logged in user (move to marker)
                 map.addMarker(MarkerOptions().position(latLng).title("You are currently here"))
                 val update: CameraUpdate
-                if (shared.getBoolean("initialFetch", true)) {
-                    // Move camera with zoom if fragment is initially opened
-                    update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
-                    map.moveCamera(update)
+                runBlocking {
+                    if (dataStoreManager.readValue(DataStoreKeys.INITIAL_FETCH_LOCATION) == "true") {
+                        update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
+                        map.moveCamera(update)
+                        dataStoreManager.setValue(DataStoreKeys.INITIAL_FETCH_LOCATION, "false")
+                    }
                 }
             }
         }
-
-        shared.edit().putBoolean("InitialFetch", false).apply()
     }
 
 //    private fun observeUserLocationSaved() {
@@ -362,13 +355,13 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         if (marker.tag == "STREAMING") {
             findNavController().navigate(R.id.action_mapsFragment_to_streamPlayerFragment)
         }
+        Log.d(TAG, "onMarkerClick: ${marker.title}")
         return true
     }
 
     companion object {
         private const val REQUEST_LOCATION =
             1 // request code to identify specific permission request
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 2000
         private const val TAG = "MapsFragment"
     }
 }

@@ -73,12 +73,8 @@ open class MapsViewModel @Inject constructor(
                 sessionManager.sessionState.value?.user?.let { user ->
                     getUsers.executeForLoggedIn(user.authToken, user.email)
                         .onEach { dataState ->
-
-//                            this.state.value = state.copy(isLoading = dataState.isLoading)
-
                             dataState.data?.let { userList ->
                                 this.state.value = state.copy(loggedInUsers = userList)
-                                Log.d(TAG, "getUsers: $userList")
                             }
 
                             dataState.stateMessage?.let { stateMessage ->
