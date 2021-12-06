@@ -40,9 +40,6 @@ open class MapsViewModel @Inject constructor(
 
     val state: MutableLiveData<MapState> = MutableLiveData(MapState())
 
-    //    private val mLocationData: MediatorLiveData<LocationInfo> = MediatorLiveData<LocationInfo>()
-//    private lateinit var locationManager: LocationManager
-
     private val locationLiveData = LocationLiveData(application)
     internal fun getLocationLiveData() = locationLiveData
 
@@ -77,7 +74,7 @@ open class MapsViewModel @Inject constructor(
                     getUsers.executeForLoggedIn(user.authToken, user.email)
                         .onEach { dataState ->
 
-                            this.state.value = state.copy(isLoading = dataState.isLoading)
+//                            this.state.value = state.copy(isLoading = dataState.isLoading)
 
                             dataState.data?.let { userList ->
                                 this.state.value = state.copy(loggedInUsers = userList)
@@ -184,7 +181,6 @@ open class MapsViewModel @Inject constructor(
                             try {
                                 val changedData: JsonObject =
                                     JsonParser.parseString(it).asJsonObject
-//                            Log.d(TAG, "subscribeToAllUserChanges: changedData $changedData")
                                 if (changedData.isJsonObject && changedData.get("email") != null) {
                                     getAndCacheUser(
                                         changedData.get("email").toString().replace("\"", " ")
