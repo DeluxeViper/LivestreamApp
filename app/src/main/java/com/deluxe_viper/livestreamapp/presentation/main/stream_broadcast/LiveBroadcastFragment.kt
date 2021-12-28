@@ -10,31 +10,29 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.databinding.FragmentLiveBroadcastBinding
+import com.deluxe_viper.livestreamapp.presentation.main.BaseMainFragment
+import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
 import com.pedro.encoder.input.video.CameraOpenException
 import com.pedro.rtmp.utils.ConnectCheckerRtmp
 import com.pedro.rtplibrary.rtmp.RtmpCamera1
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
-import java.net.Inet4Address
-import java.net.InetAddress
-import java.net.NetworkInterface
-import java.net.SocketException
+import java.net.*
 import java.util.*
+import javax.inject.Inject
 import kotlin.concurrent.schedule
 
-/**
- * A simple [Fragment] subclass.
- * Use the [LiveBroadcastFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 @AndroidEntryPoint
-class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListener,
+class LiveBroadcastFragment : BaseMainFragment(), ConnectCheckerRtmp, View.OnClickListener,
     SurfaceHolder.Callback {
 
     private var rtmpCamera1: RtmpCamera1? = null
     private var currDateAndTime: String = ""
     private var folder: File? = null // File to save recording within
 //    private val userViewModel: UserViewModel by viewModels()
+
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     private var _binding: FragmentLiveBroadcastBinding? = null
     private val binding get() = _binding!!
@@ -93,19 +91,26 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
     }
 
     private fun startStreaming() {
-        if (!rtmpCamera1!!.isStreaming) {
-            if (rtmpCamera1!!.prepareAudio() && rtmpCamera1!!.prepareVideo()) {
+        try {
+            if (!rtmpCamera1!!.isStreaming) {
+                if (rtmpCamera1!!.prepareAudio() && rtmpCamera1!!.prepareVideo()) {
 //                bStartStopStream.setText("Stop stream")
-                rtmpCamera1!!.startStream(streamUrl)
-                Log.d(TAG, "startStreaming: starting stream")
-                setIsStreaming(true)
-            } else {
-                Toast.makeText(
-                    activity,
-                    "Error preparing stream. This device cant do it.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    sessionManager.sessionState.value?.user?.let {
+                        rtmpCamera1!!.startStream("${streamUrl}${it.email}")
+
+                        Log.d(TAG, "startStreaming: starting stream")
+                        setIsStreaming(true)
+                    }
+                } else {
+                    Toast.makeText(
+                        activity,
+                        "Error preparing stream. This device cant do it.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
+        } catch (conE: ConnectException) {
+            Log.e(TAG, "startStreaming: exception:", conE)
         }
         return
     }
@@ -286,29 +291,19 @@ class LiveBroadcastFragment : Fragment(), ConnectCheckerRtmp, View.OnClickListen
         setIsStreaming(false)
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        Log.d(TAG, "onStop: stopping stream")
+        rtmpCamera1!!.stopStream()
+        setIsStreaming(false)
+    }
+
     companion object {
         private const val TAG = "LiveBroadcastFragment"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-        private const val streamUrl = "rtmp://192.168.0.99/live/67qwert"
+        private const val streamUrl = "rtmp://192.168.0.87/live/"
 
-        // VLC: rtmp://192.168.0.80/myapp
-
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment LiveBroadcastFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance() =
-            LiveBroadcastFragment().apply {
-//                arguments = Bundle().apply {
-//                    putString(ARG_PARAM1, param1)
-//                    putString(ARG_PARAM2, param2)
-//                }
-            }
+        // VLC: rtmp://192.168.0.87/live/{currentUserEmail}
     }
 }

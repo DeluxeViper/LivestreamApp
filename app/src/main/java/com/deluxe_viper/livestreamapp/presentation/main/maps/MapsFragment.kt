@@ -74,7 +74,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         // Initialize initial fetch location value to true --> in order to fetch and zoom into the logged in
         //      user's current location
         runBlocking { dataStoreManager.setValue(DataStoreKeys.INITIAL_FETCH_LOCATION, "true") }
-
     }
 
     override fun onCreateView(

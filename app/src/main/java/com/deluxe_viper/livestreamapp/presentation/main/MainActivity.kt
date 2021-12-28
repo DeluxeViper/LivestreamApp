@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
-import androidx.activity.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.deluxe_viper.livestreamapp.R
@@ -22,7 +21,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
 
     private lateinit var navController: NavController
     private lateinit var binding: ActivityMainBinding
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: ${sessionManager.sessionState.value?.user}")
@@ -75,10 +74,6 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         finish()
     }
 
-    override fun expandAppBar() {
-        // ignore
-    }
-
     override fun displayProgressBar(isLoading: Boolean) {
         if (isLoading && !isFinishing) {
             binding.progressBar.visibility = View.VISIBLE
@@ -91,26 +86,25 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         const val TAG = "MainActivity"
     }
 
-    override fun onClick(p0: View?) {
-//        when (p0?.id) {
-//            R.id.start_livestream_button -> {
-//                navHostFragment?.let {
-//                    val navController = navHostFragment!!.findNavController()
-//
-//                    val currFragment = navHostFragment!!.childFragmentManager.findFragmentById(R.id.nav_host)
-//
-//                    // Set stream and stop stream drawable icons
-//                    if (start_livestream_button.tag.equals("stream") && currFragment is MapsFragment) {
-//                        start_livestream_button.setImageDrawable(getDrawable(R.drawable.ic_baseline_stop_24))
-//                        start_livestream_button.tag = "stopStream"
-//                        navController.navigate(R.id.action_mapsFragment_to_liveBroadcastFragment)
-//                    } else if (start_livestream_button.tag.equals("stopStream") && currFragment is LiveBroadcastFragment) {
-//                        start_livestream_button.setImageDrawable(getDrawable(R.drawable.ic_baseline_live_tv_24))
-//                        start_livestream_button.tag = "stream"
-//                        navController.navigate(R.id.action_liveBroadcastFragment_to_mapsFragment)
-//                    }
-//                }
-//            }
-//        }
+    override fun onClick(view: View?) {
+        when (view?.id) {
+            R.id.start_livestream_button -> {
+                navController.let {
+                    val currFragId = it.currentDestination?.id
+                    currFragId?.let { foundCurrFragId ->
+                        if (binding.startLivestreamButton.tag.equals("stream") && currFragId == R.id.mapsFragment) {
+                            binding.startLivestreamButton.setImageDrawable(getDrawable(R.drawable.ic_baseline_stop_24))
+                            binding.startLivestreamButton.tag = "stopStream"
+                            navController.navigate(R.id.action_mapsFragment_to_liveBroadcastFragment)
+                        } else if (binding.startLivestreamButton.tag.equals("stopStream") && currFragId == R.id.liveBroadcastFragment) {
+                            binding.startLivestreamButton.setImageDrawable(getDrawable(R.drawable.ic_baseline_live_tv_24))
+                            binding.startLivestreamButton.tag = "stream"
+                            navController.navigate(R.id.action_liveBroadcastFragment_to_mapsFragment)
+                        }
+                    }
+
+                }
+            }
+        }
     }
 }
