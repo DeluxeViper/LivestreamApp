@@ -60,8 +60,4 @@ class AuthActivity : BaseActivity() {
             binding.progressBar.visibility = View.GONE
         }
     }
-
-    override fun expandAppBar() {
-        // ignore
-    }
 }

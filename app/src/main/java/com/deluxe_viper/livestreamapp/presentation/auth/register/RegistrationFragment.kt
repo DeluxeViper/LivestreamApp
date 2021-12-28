@@ -2,6 +2,7 @@ package com.deluxe_viper.livestreamapp.presentation.auth.register
 
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,6 +59,7 @@ class RegistrationFragment : BaseAuthFragment() {
                     }
                 }
             )
+            Log.d(TAG, "subscribeObservers: $state")
         }
     }
 
