@@ -8,10 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.deluxe_viper.livestreamapp.R
+import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
 import com.deluxe_viper.livestreamapp.databinding.FragmentLiveBroadcastBinding
+import com.deluxe_viper.livestreamapp.presentation.auth.register.RegisterViewModel
 import com.deluxe_viper.livestreamapp.presentation.main.BaseMainFragment
 import com.deluxe_viper.livestreamapp.presentation.session.SessionManager
+import com.deluxe_viper.livestreamapp.presentation.util.processQueue
 import com.pedro.encoder.input.video.CameraOpenException
 import com.pedro.rtmp.utils.ConnectCheckerRtmp
 import com.pedro.rtplibrary.rtmp.RtmpCamera1
@@ -29,10 +33,10 @@ class LiveBroadcastFragment : BaseMainFragment(), ConnectCheckerRtmp, View.OnCli
     private var rtmpCamera1: RtmpCamera1? = null
     private var currDateAndTime: String = ""
     private var folder: File? = null // File to save recording within
-//    private val userViewModel: UserViewModel by viewModels()
 
     @Inject
     lateinit var sessionManager: SessionManager
+    private val broadcastViewModel: LiveBroadcastViewModel by viewModels()
 
     private var _binding: FragmentLiveBroadcastBinding? = null
     private val binding get() = _binding!!
@@ -77,8 +81,22 @@ class LiveBroadcastFragment : BaseMainFragment(), ConnectCheckerRtmp, View.OnCli
         binding.broadcasterSurfaceView.holder.addCallback(this)
 
         Log.d(TAG, "onViewCreated: ${getdeviceIpAddress()}")
-        observeIsStreaming()
+        subscribeObservers()
+    }
 
+    private fun subscribeObservers() {
+        broadcastViewModel.state.observe(viewLifecycleOwner) { state ->
+            uiCommunicationListener.displayProgressBar(state.isLoading)
+            processQueue(
+                context = context,
+                queue = state.queue,
+                stateMessageCallback = object : StateMessageCallback {
+                    override fun removeMessageFromStack() {
+                        broadcastViewModel.removeHeadFromQueue()
+                    }
+                }
+            )
+        }
     }
 
     override fun onStart() {
@@ -232,29 +250,17 @@ class LiveBroadcastFragment : BaseMainFragment(), ConnectCheckerRtmp, View.OnCli
     }
 
     private fun setIsStreaming(streaming: Boolean) {
-//        val currentUser = (activity as MainActivity).getCurrentUser()
-//        if (currentUser != null) {
-//            Log.d(TAG, "fetchUserLocationsFromFirebase: fetching user locations")
-//            userViewModel.setIsStreaming(currentUser.uid, streaming)
-//        }
-    }
-
-    private fun observeIsStreaming() {
-//        userViewModel.saveIsStreamingResult.observe(viewLifecycleOwner, { result ->
-//            result?.let {
-//                when (it) {
-//                    is ResultOf.Success -> {
-//                        if (it.value.equals("Successfully saved streaming boolean.", ignoreCase = true)) {
-//                            Log.d(TAG, "observeUserLocationSaved: Successfully saved streaming boolean.")
-//                        }
-//                    }
-//                    is ResultOf.Failure -> {
-//                        val failedMessage = it.message ?: "Unknown Error"
-//                        Toast.makeText(requireContext(), "Unable to retrieve user location: $failedMessage", Toast.LENGTH_LONG).show()
-//                    }
-//                }
-//            }
-//        })
+        sessionManager.sessionState.value?.user?.let { currentUser ->
+            val updatedUser = currentUser.copy(
+                id = currentUser.id,
+                email = currentUser.email,
+                locationInfo = currentUser.locationInfo,
+                authToken = currentUser.authToken,
+                isStreaming = streaming,
+                isLoggedIn = currentUser.isLoggedIn
+            )
+            broadcastViewModel.updateUser(updatedUser, currentUser.authToken, true)
+        }
     }
 
     override fun surfaceCreated(p0: SurfaceHolder) {
@@ -278,14 +284,12 @@ class LiveBroadcastFragment : BaseMainFragment(), ConnectCheckerRtmp, View.OnCli
         currDateAndTime = ""
         if (rtmpCamera1!!.isStreaming) {
             rtmpCamera1!!.stopStream()
-//            bStartStopStream.setText("Start stream")
         }
         rtmpCamera1!!.stopPreview()
     }
 
     override fun onStop() {
         super.onStop()
-//        bStartStopStream.setText("Start stream")
         Log.d(TAG, "onStop: stopping stream")
         rtmpCamera1!!.stopStream()
         setIsStreaming(false)

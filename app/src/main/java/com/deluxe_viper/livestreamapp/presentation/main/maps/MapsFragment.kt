@@ -76,6 +76,11 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
         runBlocking { dataStoreManager.setValue(DataStoreKeys.INITIAL_FETCH_LOCATION, "true") }
     }
 
+    override fun onResume() {
+        super.onResume()
+        runBlocking { dataStoreManager.setValue(DataStoreKeys.INITIAL_FETCH_LOCATION, "true") }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -209,106 +214,6 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
             }
         }
     }
-
-//    private fun observeUserLocationSaved() {
-//        userViewModel.saveUserLocationResult.observe(viewLifecycleOwner, { result ->
-//            result?.let {
-//                when (it) {
-//                    is ResultOf.Success -> {
-//                        if (it.value.equals("Successfully saved user location", ignoreCase = true)) {
-//                            Log.d(TAG, "observeUserLocationSaved: Successfully saved user location")
-//                        }
-//                    }
-//                    is ResultOf.Failure -> {
-//                        val failedMessage = it.message ?: "Unknown Error"
-//                        Toast.makeText(requireContext(), "Unable to retrieve user location: $failedMessage", Toast.LENGTH_LONG).show()
-//                    }
-//                }
-//            }
-//        })
-//    }
-//
-//    private fun fetchUserLocationsFromFirebase() {
-//        val currentUser = (activity as MainActivity).getCurrentUser()
-//        if (currentUser != null) {
-//            Log.d(TAG, "fetchUserLocationsFromFirebase: fetching user locations")
-//            userViewModel.fetchUserLocations()
-//        }
-//    }
-//
-//    private fun observeSignout() {
-//        loginViewModel.signOutStatus.observe(viewLifecycleOwner, Observer { result ->
-//            result?.let {
-//                when (it) {
-//                    is ResultOf.Success -> {
-//                        if (it.value.equals("Signout Successful", ignoreCase = true)) {
-//                            Toast.makeText(requireContext(), "Signout Sucessful", Toast.LENGTH_LONG).show()
-//                            findNavController().navigate(R.id.action_mapsFragment_to_loginFragment)
-//                        }
-//                    }
-//                    is ResultOf.Failure -> {
-//                        val failedMessage = it.message ?: "Unknown Error"
-//                        Toast.makeText(requireContext(), "Signout Failed: $failedMessage", Toast.LENGTH_LONG).show()
-//                    }
-//                }
-//            }
-//        })
-//    }
-//
-//    private fun observeUserLocationInfoList() {
-//        userViewModel.userInfoLiveDataList.observe(viewLifecycleOwner, Observer { result ->
-//            result?.let {
-//                when (it) {
-//                    is ResultOf.Success -> {
-//                        val response = it.value
-//                        if (response.size > 0) {
-//                            populateMapWithUserLocationMarkers(response)
-//                        }
-//                    }
-//
-//                    is ResultOf.Failure -> {
-//                        val failedMessage = it.message ?: "Unknown Error"
-//                        Toast.makeText(requireContext(), "Data fetch failed $failedMessage", Toast.LENGTH_LONG).show()
-//                    }
-//                }
-//            }
-//        })
-//    }
-
-//    private fun populateMapWithUserLocationMarkers(mutableLocationInfoList: MutableList<UserInfo>) {
-//        map.clear()
-//        shared = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-//
-//        val loggedInUser = (activity as MainActivity).getCurrentUser()
-//        mutableLocationInfoList.forEach {
-//            val latLng = LatLng(it.locationInfo!!.latitude!!, it.locationInfo!!.longitude!!)
-//            if (loggedInUser != null && it.uuid != loggedInUser.uid) {
-//                // Not the logged in user
-//                val markerColor =
-//                    if (it.isStreaming) BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE) else BitmapDescriptorFactory.defaultMarker(
-//                        BitmapDescriptorFactory.HUE_RED
-//                    )
-//                val markerString = if (it.isStreaming) "${it.email} is currently STREAMING" else "${it.email ?: "Anonymous"} is currently here"
-//                val markerTag = if (it.isStreaming) "STREAMING" else ""
-//                map.addMarker(
-//                    MarkerOptions().position(latLng)
-//                        .title(markerString)
-//                        .icon(markerColor)
-//                )?.setTag(markerTag)
-//            } else if (loggedInUser != null && it.uuid == loggedInUser.uid) {
-//                // Logged in user (move to marker)
-//                map.addMarker(MarkerOptions().position(latLng).title("You are currently here"))
-//                val update: CameraUpdate
-//                if (shared.getBoolean("initialFetch", true)) {
-//                    // Move camera with zoom if fragment is initially opened
-//                    update = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f)
-//                    map.moveCamera(update)
-//                }
-//            }
-//        }
-//
-//        shared.edit().putBoolean("InitialFetch", false).apply()
-//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
