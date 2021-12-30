@@ -3,6 +3,7 @@ package com.deluxe_viper.livestreamapp.di.auth
 import com.deluxe_viper.livestreamapp.business.datasource.cache.user.UserDao
 import com.deluxe_viper.livestreamapp.business.datasource.datastore.AppDataStore
 import com.deluxe_viper.livestreamapp.business.datasource.network.auth.AuthApiService
+import com.deluxe_viper.livestreamapp.business.datasource.network.main.ApiMainService
 import com.deluxe_viper.livestreamapp.business.interactors.auth.Login
 import com.deluxe_viper.livestreamapp.business.interactors.auth.Logout
 import com.deluxe_viper.livestreamapp.business.interactors.auth.Register
@@ -30,11 +31,13 @@ class AuthModule {
     @Provides
     fun provideLogin(
         service: AuthApiService,
+        mainService: ApiMainService,
         userDao: UserDao,
         appDataStoreManager: AppDataStore,
     ): Login {
         return Login(
             service,
+            mainService,
             userDao,
             appDataStoreManager
         )

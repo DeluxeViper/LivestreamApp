@@ -47,7 +47,6 @@ class LoginFragment : BaseAuthFragment() {
         }
 
         binding.toRegisterPageBtn.setOnClickListener {
-            Log.d(TAG, "onViewCreated: clicked")
             navRegisterFragment()
         }
 
