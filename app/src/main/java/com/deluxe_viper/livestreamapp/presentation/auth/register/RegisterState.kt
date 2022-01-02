@@ -5,7 +5,6 @@ import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
 
 data class RegisterState(
     val isLoading: Boolean = false,
-    val email: String = "",
-    val password: String = "",
+    val registeredUser: Boolean = false,
     val queue: Queue<StateMessage> = Queue(mutableListOf())
 )

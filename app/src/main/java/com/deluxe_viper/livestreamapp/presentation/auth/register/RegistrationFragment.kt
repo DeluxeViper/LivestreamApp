@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.deluxe_viper.livestreamapp.R
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessageCallback
 import com.deluxe_viper.livestreamapp.databinding.FragmentRegisterBinding
 import com.deluxe_viper.livestreamapp.presentation.auth.BaseAuthFragment
@@ -59,6 +61,9 @@ class RegistrationFragment : BaseAuthFragment() {
                     }
                 }
             )
+            if (state.registeredUser) {
+                navLoginFragment()
+            }
             Log.d(TAG, "subscribeObservers: $state")
         }
     }
@@ -67,10 +72,8 @@ class RegistrationFragment : BaseAuthFragment() {
         registerViewModel.register(email, password)
     }
 
-    override fun onPause() {
-        super.onPause()
-//        cacheState()
-    }
+    private fun navLoginFragment() = findNavController().popBackStack(R.id.loginFragment, false)
+//        findNavController(requireView()).navigate(R.id.action_registrationFragment_to_loginFragment)
 
     override fun onDestroyView() {
         super.onDestroyView()

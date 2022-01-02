@@ -4,6 +4,7 @@ class SuccessHandling {
     companion object {
 
         const val SUCCESS_LOGOUT = "Logout successful."
+        const val SUCCESS_REGISTER = "Successfully registered user."
 
         const val SUCCESS_USER_UPDATED = "Successfully updated user."
 

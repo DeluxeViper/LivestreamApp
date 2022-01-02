@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deluxe_viper.livestreamapp.business.domain.util.StateMessage
+import com.deluxe_viper.livestreamapp.business.domain.util.SuccessHandling
 import com.deluxe_viper.livestreamapp.business.domain.util.UIComponentType
 import com.deluxe_viper.livestreamapp.business.domain.util.doesMessageAlreadyExistInQueue
 import com.deluxe_viper.livestreamapp.business.interactors.auth.Register
@@ -23,13 +24,13 @@ class RegisterViewModel @Inject constructor(
 
     val state: MutableLiveData<RegisterState> = MutableLiveData(RegisterState())
 
-    fun removeHeadFromQueue(){
+    fun removeHeadFromQueue() {
         state.value?.let { state ->
             try {
                 val queue = state.queue
                 queue.remove() // can throw exception if empty
                 this.state.value = state.copy(queue = queue)
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 Log.d(TAG, "removeHeadFromQueue: Nothing to remove from DialogQueue")
             }
         }
@@ -39,7 +40,7 @@ class RegisterViewModel @Inject constructor(
         state.value?.let { state ->
             val queue = state.queue
             if (!stateMessage.doesMessageAlreadyExistInQueue(queue = queue)) {
-                if (!(stateMessage.response.uiComponentType is UIComponentType.None)) {
+                if (stateMessage.response.uiComponentType !is UIComponentType.None) {
                     queue.add(stateMessage)
                     this.state.value = state.copy(queue = queue)
                 }
@@ -58,10 +59,16 @@ class RegisterViewModel @Inject constructor(
             ).onEach { dataState ->
                 this.state.value = state.copy(isLoading = dataState.isLoading)
 
-                // TODO: Double check this logic
+                dataState.data?.let { response ->
+                    if (response.message == SuccessHandling.SUCCESS_REGISTER) {
+                        this.state.value = state.copy(registeredUser = true)
+                    }
+                }
+
                 dataState.stateMessage?.let { stateMessage ->
                     appendToMessageQueue(stateMessage)
                 }
+
             }.launchIn(viewModelScope)
         }
     }
