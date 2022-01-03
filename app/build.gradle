@@ -1,9 +1,11 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'dagger.hilt.android.plugin'
-
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "kotlin-kapt"
+    id "com.google.gms.google-services"
+    id "dagger.hilt.android.plugin"
+    id "com.google.secrets_gradle_plugin" version "0.6.1"
+}
 android {
     compileSdkVersion 31
 
@@ -27,7 +29,9 @@ android {
 
     allprojects {
         repositories {
-            maven { url 'https://jitpack.io' }
+            maven {
+                url 'https://jitpack.io'
+            }
         }
     }
 
@@ -131,5 +135,5 @@ dependencies {
     // Exo Player
     implementation 'com.google.android.exoplayer:extension-rtmp:2.16.1'
     implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
-
 }
+
