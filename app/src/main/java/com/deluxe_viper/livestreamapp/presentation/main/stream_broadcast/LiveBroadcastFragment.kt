@@ -306,7 +306,7 @@ class LiveBroadcastFragment : BaseMainFragment(), ConnectCheckerRtmp, View.OnCli
     companion object {
         private const val TAG = "LiveBroadcastFragment"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-        private const val streamUrl = "rtmp://192.168.0.87/live/"
+        private const val streamUrl = "rtmp://192.168.0.93/live/"
 
         // VLC: rtmp://192.168.0.87/live/{currentUserEmail}
     }

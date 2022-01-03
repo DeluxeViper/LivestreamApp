@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".presentation.main.stream_play.StreamPlayerFragment">
 
-    <SurfaceView
-        android:id="@+id/playerSurfaceView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <!--    <SurfaceView-->
+    <!--        android:id="@+id/playerSurfaceView"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent" />-->
 
-    <Button
-        android:id="@+id/bStartStopPlayer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Player"
-        android:layout_alignBottom="@id/playerSurfaceView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="100dp"/>
+<!--    <Button-->
+<!--        android:id="@+id/bStartStopPlayer"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignBottom="@id/player_view"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:layout_marginBottom="100dp"-->
+<!--        android:text="Start Player" />-->
+
+    <com.google.android.exoplayer2.ui.StyledPlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:show_shuffle_button="true"
+        app:show_subtitle_button="true"
+        app:use_controller="false" />
 
 </RelativeLayout>

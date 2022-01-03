@@ -193,7 +193,7 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
                         BitmapDescriptorFactory.HUE_RED
                     )
                 val markerString =
-                    if (it.isStreaming) "${it.email} is currently STREAMING" else "${it.email ?: "Anonymous"} is currently here"
+                    if (it.isStreaming) it.email else it.email ?: "Anonymous"
                 val markerTag = if (it.isStreaming) "STREAMING" else ""
                 map.addMarker(
                     MarkerOptions().position(latLng)
@@ -257,9 +257,12 @@ class MapsFragment : BaseMainFragment(), GoogleMap.OnMyLocationButtonClickListen
 
     override fun onMarkerClick(marker: Marker): Boolean {
         if (marker.tag == "STREAMING") {
-            findNavController().navigate(R.id.action_mapsFragment_to_streamPlayerFragment)
+            val bundle = Bundle()
+            bundle.putString("STREAMER", marker.title)
+            findNavController().navigate(R.id.action_mapsFragment_to_streamPlayerFragment, bundle)
         }
-        Log.d(TAG, "onMarkerClick: ${marker.title}")
+        Log.d(TAG, "onMarkerClick: title: ${marker.title}")
+        Log.d(TAG, "onMarkerClick: tag: ${marker.tag}")
         return true
     }
 

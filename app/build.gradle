@@ -128,4 +128,8 @@ dependencies {
     // Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:2.3.0"
 
+    // Exo Player
+    implementation 'com.google.android.exoplayer:extension-rtmp:2.16.1'
+    implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
+
 }
