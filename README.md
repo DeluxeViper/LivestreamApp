@@ -5,6 +5,9 @@
 ### Built with
 * Kotlin
 * XML
+* Retrofit
+* GCP (Google Maps API)
+* Hilt (Dagger2)
 * Android Studio
 * Gradle
 * MVI
@@ -12,5 +15,4 @@
 
 ### Setup
 
-NGINX Rtmp Server setup:
-  `docker run -d -p 1935:1935 --name nginx-rtmp tiangolo/nginx-rtmp`
+In order to have this work it must be paired with the livestreaming backend located here: https://github.com/DeluxeViper/livestreambackend-mongodb
